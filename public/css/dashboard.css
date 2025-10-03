@@ -1,0 +1,191 @@
+body {
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  background: #f0f4f8;
+  color: #333;
+  min-height: 100vh;
+}
+
+/* Barra superior fixa */
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 62px;
+  width: 100%;
+  background-color: #4BA1BB;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 25px;
+  box-shadow: 0 2px 7px rgba(0,0,0,0.11);
+  color: white;
+  z-index: 1000;
+}
+
+.topbar-left h1 {
+  margin: 0;
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+.topbar-right .logout-btn {
+  background: #337ab7;
+  color: white;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  font-weight: 600;
+  transition: background 0.3s ease-in-out;
+}
+
+.topbar-right .logout-btn:hover {
+  background: #286090;
+}
+
+/* Content abaixo da topbar */
+.main-container {
+  display: flex;
+  gap: 40px;
+  padding: 80px 30px 30px; /* top padding para não esconder conteúdo abaixo da topbar */
+  max-width: 1200px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.calendar-section, .agendamento-lista {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  flex: 1;
+  box-shadow: 0 0 15px rgba(0,0,0,0.1);
+}
+
+#calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.dia {
+  padding: 10px;
+  text-align: center;
+  border-radius: 5px;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid transparent;
+  font-weight: 600;
+  color: #2c3e50;
+  transition: background-color 0.25s;
+}
+
+.dia:hover {
+  background-color: #d0e7f9;
+}
+
+.dia.agendado {
+  background-color: #4BA1BB;
+  color: white;
+}
+
+.dia.selecionado {
+  border: 2px solid #004080;
+}
+
+#listaAgendamentos {
+  list-style: none;
+  padding: 0;
+  margin-top: 15px;
+}
+
+#listaAgendamentos li {
+  padding: 10px;
+  background: #f5f9fc;
+  border-radius: 5px;
+  margin-bottom: 8px;
+  color: #333;
+  font-weight: 600;
+}
+
+.btn {
+  background-color: #4BA1BB;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 15px;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.btn:hover {
+  background-color: #3a8bb3;
+}
+
+.btn-cancel {
+  background-color: #bbb;
+  margin-left: 10px;
+}
+
+/* Modal styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right:0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-content {
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 420px;
+  box-sizing: border-box;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: #4BA1BB;
+}
+
+.modal-content label {
+  display: block;
+  margin-top: 15px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.modal-content input,
+.modal-content select,
+.modal-content textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  font-size: 1rem;
+  font-family: inherit;
+  color: #333;
+}
+
+.modal-buttons {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px; 
+}

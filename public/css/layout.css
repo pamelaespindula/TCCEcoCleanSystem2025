@@ -1,0 +1,26 @@
+/* Estilo base da página */
+body {
+  font-family: 'Arial', sans-serif;
+  background: linear-gradient(135deg, #51c7d6 0%, #23255a 100%);
+  margin: 0;
+  color: #fff;
+  min-height: 100vh;
+}
+
+/* Container principal da página */
+.main-container {
+  padding-top: 100px; /* Espaço para a navbar fixa (70px + margem) */
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Outros estilos gerais, resets ou para elementos comuns podem ir aqui */
+
+/* Exemplo de reset para links sem interferir no nav */
+a {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}

@@ -1,0 +1,64 @@
+.form-section {
+  background: white;
+  padding: 25px 30px;
+  border-radius: 9px;
+  max-width: 530px;
+  margin: 0 auto;
+  box-shadow: 0 0 12px rgba(0,0,0,0.12);
+  color: #333;
+}
+
+.form-section h1 {
+  margin-bottom: 18px;
+  font-weight: 700;
+  color: #2a3a5d;
+}
+
+.form-agendar label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 700;
+  color: #445;
+}
+
+.form-agendar input[type="date"],
+.form-agendar input[type="time"],
+.form-agendar select,
+.form-agendar textarea {
+  width: 100%;
+  padding: 9px 12px;
+  margin-bottom: 18px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #bbb;
+}
+
+.form-agendar textarea {
+  resize: vertical;
+  
+}
+.form-agendar input[type="text"] {
+  width: 100%;
+  padding: 9px 12px;
+  margin-bottom: 18px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #bbb;
+  box-sizing: border-box; /* garante que padding faz parte do tamanho */
+}
+
+.btn {
+  background-color: #4BA1BB;
+  border: none;
+  color: white;
+  padding: 14px 30px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+  background-color: #3a92a4;
+}
