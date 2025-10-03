@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title><%= title || 'EcoCleanSystem' %></title>
+  <link rel="stylesheet" href="/css/layout.css" />
+  <% if (typeof customCss !== 'undefined') { %>
+    <link rel="stylesheet" href="<%= customCss %>" />
+  <% } %>
+</head>
+<body>
+  <% if (!isLoginPage) { %>
+    <%- include('partials/nav', { activePage: activePage }) %>
+  <% } %>
+  <main class="main-container">
+    <%- body %>
+  </main>
+  <script src="/js/calendar.js"></script>
+  <% if (typeof customScripts !== 'undefined') { %>
+    <%= customScripts %>
+  <% } %>
+</body>
+</html>

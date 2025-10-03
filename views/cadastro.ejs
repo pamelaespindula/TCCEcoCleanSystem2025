@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>EcoClean - Cadastro</title>
+  <link rel="stylesheet" href="/css/login.css" />
+</head>
+<body>
+  <div class="login-container">
+    <h2>Cadastro de Funcionário</h2>
+
+    <% if (error) { %>
+      <div class="error-message"><%= error %></div>
+    <% } %>
+    <% if (sucesso) { %>
+      <div class="success-message"><%= sucesso %></div>
+    <% } %>
+
+    <form method="POST" action="/cadastro">
+      <div class="input-group">
+        <label for="nome">Nome Completo</label>
+        <input id="nome" name="nome" type="text" required />
+      </div>
+      <div class="input-group">
+        <label for="usuario">Usuário</label>
+        <input id="usuario" name="usuario" type="text" required />
+      </div>
+      <div class="input-group">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" required />
+      </div>
+      <div class="input-group">
+        <label for="senha">Senha</label>
+        <input id="senha" name="senha" type="password" required />
+      </div>
+      <div class="input-group">
+        <label for="confirmar_senha">Confirmar Senha</label>
+        <input id="confirmar_senha" name="confirmar_senha" type="password" required />
+      </div>
+      <button type="submit" class="login-btn">CADASTRAR</button>
+    </form>
+
+    <div class="register-link">
+      Já tem uma conta? <a href="/login">Faça login!</a>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Agendar Atendimento - EcoCleanSystem</title>
+  <link rel="stylesheet" href="/css/layout.css" />
+  <link rel="stylesheet" href="/css/form.css" />
+  <link rel="stylesheet" href="/css/nav.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body>
+  <%- include('partials/nav', { activePage: 'agendar' }) %>
+
+  <main class="main-container">
+    <section class="form-section">
+      <h1>Agendar Novo Atendimento</h1>
+      <form action="/agendamentos/agendar" method="POST" class="form-agendar">
+        <label for="servico">Serviço:</label>
+        <select id="servico" name="servico_id" required>
+          <option value="" selected disabled>Selecione um serviço</option>
+          <option value="1">Limpeza de vidro</option>
+          <option value="2">Limpeza de ACM</option>
+          <option value="3">Limpeza de placa solar</option>
+          <option value="4">Restauração de ACM</option>
+        </select>
+
+        <label for="data">Data:</label>
+        <input type="date" id="data" name="data_agendada" required />
+
+        <label for="hora">Hora:</label>
+        <input type="time" id="hora" name="hora_agendada" required />
+
+        <label for="observacoes">Observações:</label>
+        <textarea id="observacoes" name="observacoes" rows="5" placeholder="Detalhes adicionais"></textarea>
+
+        <button type="submit" class="btn">Agendar</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

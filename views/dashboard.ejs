@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard - EcoCleanSystem</title>
+  <link rel="stylesheet" href="/css/layout.css" />
+  <link rel="stylesheet" href="/css/calendar.css" />
+  <link rel="stylesheet" href="/css/nav.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body>
+  <%- include('partials/nav', { activePage: 'dashboard' }) %>
+
+  <div class="calendar-container">
+    <div class="calendar-box">
+      <div class="calendar-header">
+        <button id="prevMonthBtn">&lt;</button>
+        <span class="month-display" id="monthDisplay"></span>
+        <span class="year-display" id="yearDisplay"></span>
+        <button id="nextMonthBtn">&gt;</button>
+      </div>
+      <table id="calendar">
+        <thead>
+          <tr>
+            <th>Seg</th>
+            <th>Ter</th>
+            <th>Qua</th>
+            <th>Qui</th>
+            <th>Sex</th>
+            <th>Sáb</th>
+            <th>Dom</th>
+          </tr>
+        </thead>
+        <tbody id="calendarBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const calendarBody = document.getElementById('calendarBody');
+    const monthDisplay = document.getElementById('monthDisplay');
+    const yearDisplay = document.getElementById('yearDisplay');
+    const prevMonthBtn = document.getElementById('prevMonthBtn');
+    const nextMonthBtn = document.getElementById('nextMonthBtn');
+    let currentDate = new Date();
+
+    async function getAgendamentos() {
+      try {
+        const response = await fetch('/api/agendamentos');
+        if (!response.ok) throw new Error('Erro ao buscar agendamentos');
+        return await response.json();
+      } catch (error) {
+        console.error('Erro:', error);
+        return [];
+      }
+    }
+
+    function showDayDetails(date, events) {
+      const modalHtml = `
+        <div class="modal-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;justify-content:center;align-items:center;z-index:1000;">
+          <div class="modal-content" style="background:#23255a;padding:25px;border-radius:12px;max-width:500px;width:90%;color:white;box-shadow:0 10px 30px rgba(0,0,0,0.3);">
+            <h3 style="margin-top:0;color:#51c7d6;border-bottom:2px solid #51c7d6;padding-bottom:10px;">Agendamentos - ${formatDateBR(date)}</h3>
+            <div class="events-list" style="max-height:300px;overflow-y:auto;margin:15px 0;">
+              ${events.length > 0 
+                ? events.map(event => `
+                  <div style="background:#2f3163;padding:12px;margin:8px 0;border-radius:8px;border-left:4px solid #47e7b6;">
+                    <strong style="color:#47e7b6;">${event.nome_servico || 'Serviço'}</strong> 
+                    <span style="float:right;color:#51c7d6;">${event.hora_agendada || ''}</span>
+                    ${event.observacoes ? `<br><small style="color:#aad1e6;margin-top:5px;display:block;">${event.observacoes}</small>` : ''}
+                  </div>
+                `).join('')
+                : '<p style="text-align:center;color:#aad1e6;padding:20px;">Não há agendamentos para este dia.</p>'
+              }
+            </div>
+            <button onclick="this.closest('.modal-overlay').remove()" style="width:100%;padding:12px;background:#51c7d6;color:#191a42;border:none;border-radius:8px;cursor:pointer;font-weight:bold;font-size:1rem;transition:background 0.3s;">Fechar</button>
+          </div>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
+    function formatDateBR(dateString) {
+      const date = new Date(dateString + 'T00:00:00');
+      return date.toLocaleDateString('pt-BR');
+    }
+
+    async function gerarCalendario(date, eventos) {
+      calendarBody.innerHTML = '';
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      yearDisplay.textContent = year;
+      monthDisplay.textContent = date.toLocaleString('pt-BR', { month: 'long' });
+      const firstDay = new Date(year, month, 1).getDay();
+      const startDay = firstDay === 0 ? 6 : firstDay - 1;
+      const lastDay = new Date(year, month + 1, 0).getDate();
+      let day = 1;
+      for (let semana = 0; semana < 6; semana++) {
+        const tr = document.createElement('tr');
+        for (let diaSemana = 0; diaSemana < 7; diaSemana++) {
+          const td = document.createElement('td');
+          if (semana === 0 && diaSemana < startDay) {
+            td.classList.add('disabled');
+            td.textContent = '';
+          } else if (day > lastDay) {
+            td.classList.add('disabled');
+            td.textContent = '';
+          } else {
+            const dataFormatada = `${year}-${String(month + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+            const hoje = new Date();
+            if (day === hoje.getDate() && month === hoje.getMonth() && year === hoje.getFullYear()) {
+              td.classList.add('today');
+            }
+            const eventosDoDia = eventos.filter(e => e.data_agendada === dataFormatada);
+            const dayContent = document.createElement('div');
+            dayContent.style.position = 'relative';
+            dayContent.style.minHeight = '60px';
+            const dayNumber = document.createElement('div');
+            dayNumber.textContent = day;
+            dayNumber.style.fontWeight = 'bold';
+            dayNumber.style.fontSize = '1.1em';
+            dayContent.appendChild(dayNumber);
+
+            if (eventosDoDia.length > 0) {
+              td.classList.add('event-day');
+              const eventIndicator = document.createElement('div');
+              eventIndicator.style.background = '#47e7b6';
+              eventIndicator.style.color = '#13132c';
+              eventIndicator.style.borderRadius = '50%';
+              eventIndicator.style.width = '20px';
+              eventIndicator.style.height = '20px';
+              eventIndicator.style.display = 'inline-flex';
+              eventIndicator.style.alignItems = 'center';
+              eventIndicator.style.justifyContent = 'center';
+              eventIndicator.style.fontSize = '12px';
+              eventIndicator.style.fontWeight = 'bold';
+              eventIndicator.style.position = 'absolute';
+              eventIndicator.style.top = '5px';
+              eventIndicator.style.right = '5px';
+              eventIndicator.textContent = eventosDoDia.length;
+              eventIndicator.title = `${eventosDoDia.length} agendamento(s)`;
+              dayContent.appendChild(eventIndicator);
+            }
+            td.appendChild(dayContent);
+            td.addEventListener('click', function() {
+              if (!td.classList.contains('disabled')) {
+                showDayDetails(dataFormatada, eventosDoDia);
+              }
+            });
+            day++;
+          }
+          tr.appendChild(td);
+        }
+        calendarBody.appendChild(tr);
+        if (day > lastDay) break;
+      }
+    }
+    async function atualizarCalendario() {
+      const eventos = await getAgendamentos();
+      gerarCalendario(currentDate, eventos);
+    }
+    prevMonthBtn.addEventListener('click', () => {
+      currentDate.setMonth(currentDate.getMonth() - 1);
+      atualizarCalendario();
+    });
+    nextMonthBtn.addEventListener('click', () => {
+      currentDate.setMonth(currentDate.getMonth() + 1);
+      atualizarCalendario();
+    });
+    atualizarCalendario();
+  });
+</script>
+</body>
+</html>

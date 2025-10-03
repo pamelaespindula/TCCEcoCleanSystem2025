@@ -1,0 +1,14 @@
+<nav class="topbar">
+  <div class="topbar-left">
+    <img src="/img/seu-logo.png" alt="EcoCleanSystem Logo" class="logo" />
+    <div class="topnav">
+      <a href="/dashboard" class="<%= activePage === 'dashboard' ? 'active' : '' %>">Agenda</a>
+      <a href="/agendamentos/agendar" class="<%= activePage === 'agendar' ? 'active' : '' %>">Agendar Atendimento</a>
+      <a href="/atendimentos" class="<%= activePage === 'atendimentos' ? 'active' : '' %>">Atendimentos</a>
+      <a href="/materiais" class="<%= activePage === 'materiais' ? 'active' : '' %>">Materiais</a>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <button class="logout-btn" onclick="window.location.href='/logout'">Sair</button>
+  </div>
+</nav>
