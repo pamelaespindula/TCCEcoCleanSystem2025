@@ -1,7 +1,6 @@
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
-const expressLayouts = require('express-ejs-layouts');
 const db = require('./config/db');
 
 const app = express();
@@ -13,11 +12,9 @@ app.use(express.json());
 // Arquivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Configuração EJS e layout
+// Configuração EJS
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-app.use(expressLayouts);
-app.set('layout', 'layout');
 
 // Configurar sessão
 app.use(session({
@@ -31,11 +28,9 @@ function protegerRota(req, res, next) {
   if (req.session && req.session.usuario) {
     return next();
   }
-
   if (req.path === '/login' || req.path === '/logout' || req.path.startsWith('/cadastro')) {
     return next();
   }
-
   return res.redirect('/login');
 }
 
@@ -50,7 +45,7 @@ const materiaisRoutes = require('./src/routes/materiaisRoutes');
 // Variáveis globais para views
 app.use((req, res, next) => {
   res.locals.usuario = req.session.usuario || null;
-  res.locals.isLoginPage = req.path === '/login' || req.path === '/cadastro';
+  res.locals.isLoginPage = req.path === '/login' || req.path.startsWith('/cadastro');
 
   if (req.path === '/' || req.path.startsWith('/dashboard')) {
     res.locals.activePage = 'dashboard';
@@ -63,44 +58,40 @@ app.use((req, res, next) => {
   } else {
     res.locals.activePage = '';
   }
-
   res.locals.title = 'EcoCleanSystem';
-
   next();
 });
 
 // Rotas públicas
 app.use('/cadastro', cadastroRoutes);
+app.use('/', loginRoutes); // loginRoutes no caminho raiz
 
-// Rota login com redirecionamento para dashboard se já logado
-app.get('/login', (req, res) => {
-  if (req.session && req.session.usuario) {
-    return res.redirect('/dashboard');
-  }
-  res.render('login', { title: 'Login - EcoCleanSystem', activePage: '' });
-});
-
-// Recebe login POST - Exemplo básico (ajuste conforme sua lógica)
-app.post('/login', async (req, res) => {
-  const { username, password } = req.body;
-  // Valide usuário e senha aqui com db
-  const usuarioValido = true; // Substitua pela validação real
-
-  if (usuarioValido) {
-    req.session.usuario = { nome: username }; // Armazene dados do usuário na sessão
-    return res.redirect('/dashboard');
-  } else {
-    return res.render('login', { title: 'Login', error: 'Usuário ou senha inválidos' });
-  }
-});
-
+// Rotas protegidas
 app.use('/agendamentos', protegerRota, agendamentosRoutes);
 app.use('/dashboard', protegerRota, dashboardRoutes);
 app.use('/atendimentos', protegerRota, atendimentosRoutes);
 app.use('/materiais', protegerRota, materiaisRoutes);
 
-// Redirecionar raiz para dashboard via GET
-app.get('/', (req, res) => res.redirect('/dashboard'));
+// Rota AJAX para detalhes do atendimento (usada pelo modal do checklist)
+app.get('/atendimentos/:id', protegerRota, async (req, res) => {
+  const id = req.params.id;
+  try {
+    const atendimento = await db.getAtendimentoById(id);
+    if (!atendimento) return res.status(404).json({ error: 'Atendimento não encontrado' });
+    res.json(atendimento);
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao buscar atendimento' });
+  }
+});
+
+// Redirecionar raiz para dashboard ou login conforme sessão
+app.get('/', (req, res) => {
+  if (req.session && req.session.usuario) {
+    res.redirect('/dashboard');
+  } else {
+    res.redirect('/login');
+  }
+});
 
 // Logout
 app.get('/logout', (req, res) => {
@@ -109,7 +100,7 @@ app.get('/logout', (req, res) => {
   });
 });
 
-// Middleware 404 - erro simples
+// Middleware 404 - Página não encontrada
 app.use((req, res) => {
   res.status(404).send('Página não encontrada.');
 });
