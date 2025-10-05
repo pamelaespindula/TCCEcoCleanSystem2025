@@ -3,13 +3,17 @@ const router = express.Router();
 const db = require('../../config/db');
 
 router.get('/', async (req, res) => {
-  const [atendimentos] = await db.query(`
-    SELECT a.id, s.nome as nome_servico, a.data_agendada, a.hora_agendada, a.status
-    FROM agendamentos a
-    JOIN servicos s ON a.servico_id = s.id
-    ORDER BY a.data_agendada, a.hora_agendada
-  `);
-  res.render('atendimentos', { atendimentos, usuario: req.session.usuario });
+  try {
+    const [atendimentos] = await db.query(`
+      SELECT a.id, s.nome as nome_servico, a.data_agendada, a.hora_agendada, a.status, a.observacoes
+      FROM agendamentos a
+      JOIN servicos s ON a.servico_id = s.id
+      ORDER BY a.data_agendada, a.hora_agendada
+    `);
+    res.render('atendimentos', { atendimentos, usuario: req.session.usuario });
+  } catch (error) {
+    res.status(500).send('Erro ao carregar atendimentos');
+  }
 });
 
 router.put('/:id', async (req, res) => {

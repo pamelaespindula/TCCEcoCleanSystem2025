@@ -1,26 +1,183 @@
-<header><h1>Atendimentos Agendados</h1></header>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Atendimentos - EcoCleanSystem</title>
+  <link rel="stylesheet" href="/css/layout.css" />
+  <link rel="stylesheet" href="/css/nav.css" />
+  <link rel="stylesheet" href="/css/atendimentos.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body>
+  <%- include('partials/nav', { activePage: 'atendimentos' }) %>
+  <main class="main-container">
+    <section class="atendimentos-section">
+      <h1 class="atendimentos-titulo">Checklist de Atendimentos</h1>
+      <%
+        atendimentos.sort((a,b) => new Date(a.data_agendada + 'T' + a.hora_agendada) - new Date(b.data_agendada + 'T' + b.hora_agendada));
+        const meses = {};
+        atendimentos.forEach(a => {
+          let dataStr = '';
+          if (typeof a.data_agendada === 'string') {
+            dataStr = a.data_agendada;
+          } else if (a.data_agendada instanceof Date) {
+            const y = a.data_agendada.getFullYear();
+            const m = (a.data_agendada.getMonth()+1).toString().padStart(2,'0');
+            const d = a.data_agendada.getDate().toString().padStart(2,'0');
+            dataStr = `${y}-${m}-${d}`;
+          } else {
+            dataStr = String(a.data_agendada);
+          }
+          const [ano, mes] = dataStr.split('-');
+          const chave = `${mes}/${ano}`;
+          if (!meses[chave]) meses[chave] = [];
+          meses[chave].push({...a, dataStr});
+        });
 
-<ul id="listaAtendimentos">
-  <% atendimentos.forEach(atendimento => { %>
-    <li>
-      <input type="checkbox" class="check-atendimento" data-id="<%= atendimento.id %>"
-        <% if (atendimento.status === 'concluído') { %> checked <% } %> />
-      <%= atendimento.nome_servico %> - <%= atendimento.data_agendada %> às <%= atendimento.hora_agendada %>
-    </li>
-  <% }) %>
-</ul>
+        Object.keys(meses).sort((a,b) => {
+          const [mesA,anoA] = a.split('/');
+          const [mesB,anoB] = b.split('/');
+          if (anoA !== anoB) return anoA - anoB;
+          return mesA - mesB;
+        }).forEach(mesAno => {
+      %>
+      <div class="bloco-mes">
+        <h2 class="titulo-mes"><%= (() => {
+          const [mes, ano] = mesAno.split('/');
+          const mesesNome = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+          return `${mesesNome[parseInt(mes)-1]} / ${ano}`;
+        })() %></h2>
+        <ul class="checklist">
+          <% meses[mesAno].forEach(atendimento => { %>
+            <li class="item-checklist <%= atendimento.status === 'concluído' ? 'concluido' : '' %>">
+              <label>
+                <input type="checkbox" class="check-atendimento" data-id="<%= atendimento.id %>" <% if(atendimento.status === 'concluído') { %> checked <% } %> />
+                <span class="checkbox-custom"></span>
+                <span class="descricao">
+                  <b><%= atendimento.nome_servico %></b>
+                  <span class="info-data-hora"><%= atendimento.dataStr.split('-').reverse().join('/') %> • <%= atendimento.hora_agendada.split(':').slice(0,2).join(':') %></span>
+                  <% if(atendimento.observacoes && atendimento.observacoes.trim() !== '') { %>
+                    <span class="obs-menor"><b>Observações:</b> <%= atendimento.observacoes.length > 60 ? atendimento.observacoes.substring(0,60) + '...' : atendimento.observacoes %></span>
+                  <% } %>
+                </span>
+              </label>
+              <div class="opcoes-menu" tabindex="0" aria-label="Mais opções">&#8230;</div>
+              <div class="menu-dropdown" style="display:none;">
+                <button class="btn-ver-detalhes" data-id="<%= atendimento.id %>">Ver detalhes</button>
+                <button class="btn-alterar" data-id="<%= atendimento.id %>">Alterar agendamento</button>
+                <button class="btn-excluir" data-id="<%= atendimento.id %>">Excluir agendamento</button>
+              </div>
+            </li>
+          <% }) %>
+        </ul>
+      </div>
+      <% }); %>
+    </section>
+  </main>
+
+  <!-- Modal detalhes -->
+  <div id="modalDetalhes" class="modal" style="display:none;">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h3>Detalhes do Agendamento</h3>
+      <div id="detalhesConteudo"></div>
+    </div>
+  </div>
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Abrir/fechar menu "..." nos três pontinhos
+  document.querySelectorAll('.opcoes-menu').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      // Fecha todos os menus abertos, menos o do botão clicado
+      document.querySelectorAll('.menu-dropdown').forEach(menu => {
+        if(menu !== btn.nextElementSibling) {
+          menu.style.display = 'none';
+        }
+      });
+      // Toggle do menu do botão clicado
+      const menu = btn.nextElementSibling;
+      if(menu.style.display === 'block') {
+        menu.style.display = 'none';
+      } else {
+        menu.style.display = 'block';
+      }
+    });
+  });
+
+  // Fecha menu ao clicar fora
+  document.addEventListener('click', function() {
+    document.querySelectorAll('.menu-dropdown').forEach(menu => {
+      menu.style.display = 'none';
+    });
+  });
+
+  // Não fecha se clicar dentro do menu
+  document.querySelectorAll('.menu-dropdown').forEach(menu => {
+    menu.addEventListener('click', e => e.stopPropagation());
+  });
+
+  // Checkbox: marcar concluído
   document.querySelectorAll('.check-atendimento').forEach(chk => {
     chk.addEventListener('change', async e => {
       const id = e.target.getAttribute('data-id');
       const status = e.target.checked ? 'concluído' : 'pendente';
-
       await fetch('/atendimentos/' + id, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status })
       });
+      e.target.closest('.item-checklist').classList.toggle('concluido', e.target.checked);
     });
   });
+
+  // Botões menu funcional
+  const modal = document.getElementById('modalDetalhes');
+  const modalContent = document.getElementById('detalhesConteudo');
+  const closeBtn = modal.querySelector('.close');
+  closeBtn.onclick = () => modal.style.display = 'none';
+  window.onclick = e => { if (e.target == modal) modal.style.display = 'none'; };
+
+  // Ver detalhes
+  document.querySelectorAll('.btn-ver-detalhes').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      const id = btn.getAttribute('data-id');
+      const response = await fetch('/atendimentos/' + id);
+      const json = await response.json();
+      modalContent.innerHTML = `
+        <p><b>Serviço:</b> ${json.nome_servico}</p>
+        <p><b>Data:</b> ${(json.data_agendada || '').split('-').reverse().join('/') }</p>
+        <p><b>Hora:</b> ${json.hora_agendada ? json.hora_agendada.split(':').slice(0,2).join(':') : ''}</p>
+        <p><b>Status:</b> ${json.status || ''}</p>
+        <p><b>Observações:</b><br>${(json.observacoes||'').replace(/[\n\r]+/g,'<br>')}</p>
+      `;
+      modal.style.display = 'flex';
+      document.querySelectorAll('.menu-dropdown').forEach(menu => {
+        menu.style.display = 'none';
+      });
+    });
+  });
+
+  // Excluir atendimento
+  document.querySelectorAll('.btn-excluir').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      const id = btn.getAttribute('data-id');
+      if (confirm('Confirma exclusão do agendamento?')) {
+        await fetch('/atendimentos/' + id, { method: 'DELETE' });
+        location.reload();
+      }
+    });
+  });
+
+  // Alterar atendimento (redireciona para editar)
+  document.querySelectorAll('.btn-alterar').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const id = btn.getAttribute('data-id');
+      window.location.href = '/atendimentos/editar/' + id;
+    });
+  });
+});
 </script>
+</body>
+</html>

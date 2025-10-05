@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title><%= title || 'EcoCleanSystem' %></title>
   <link rel="stylesheet" href="/css/layout.css" />
-  <% if (typeof customCss !== 'undefined') { %>
-    <link rel="stylesheet" href="<%= customCss %>" />
+  <% if (typeof customCss !== 'undefined' && customCss) { %>
+    <link rel="stylesheet" href="<%= customCss %>"/>
   <% } %>
+  <link rel="stylesheet" href="/css/nav.css" />
 </head>
 <body>
   <% if (!isLoginPage) { %>
@@ -16,8 +17,7 @@
   <main class="main-container">
     <%- body %>
   </main>
-  <script src="/js/calendar.js"></script>
-  <% if (typeof customScripts !== 'undefined') { %>
+  <% if (typeof customScripts !== 'undefined' && customScripts) { %>
     <%= customScripts %>
   <% } %>
 </body>
