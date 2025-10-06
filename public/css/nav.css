@@ -17,7 +17,7 @@
     height: 80px;
 }
 
-/* LOGO E MARCA */
+/* MARCA */
 .brand {
     display: flex;
     align-items: center;
@@ -131,6 +131,7 @@
     border-radius: 50%;
     opacity: 0;
     transition: opacity 0.3s ease;
+    display: none;
 }
 
 .nav-link.active::before {

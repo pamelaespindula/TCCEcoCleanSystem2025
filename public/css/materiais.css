@@ -1,4 +1,4 @@
-/* ESTILOS GERAIS */
+/* RESET E BASE */
 * {
     margin: 0;
     padding: 0;
@@ -8,10 +8,12 @@
 
 body {
     background: linear-gradient(135deg, #36c3d4 0%, #234567 100%) fixed !important;
-    line-height: 1.6;
     min-height: 100vh;
+    line-height: 1.6;
+    color: #e5f6fa;
 }
 
+/* CONTAINER CENTRALIZADO */
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -83,29 +85,30 @@ body {
 }
 
 .page-header h1 {
-    color: #23224A;
+    color: #e5f6fa;
     font-size: 2.5rem;
     margin-bottom: 10px;
     font-weight: 700;
 }
 
 .page-subtitle {
-    color: #ffffff;
+    color: rgba(229, 246, 250, 0.9);
     font-size: 1.2rem;
 }
 
 /* SEÇÕES */
 .section {
-    background: white;
+    background: #23224A;
     border-radius: 16px;
     padding: 30px;
     margin-bottom: 30px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    box-shadow: 0 5px 20px rgba(35, 34, 74, 0.08);
     border-top: 4px solid #56d0d0;
+    color: #e5f6fa;
 }
 
 .section h2 {
-    color: #23224A;
+    color: #56d0d0;
     font-size: 1.8rem;
     margin-bottom: 25px;
     display: flex;
@@ -132,7 +135,7 @@ body {
 }
 
 .form-group label {
-    color: #23224A;
+    color: #e5f6fa;
     font-weight: 600;
     margin-bottom: 8px;
     font-size: 1rem;
@@ -140,18 +143,24 @@ body {
 
 .form-group input {
     padding: 12px 16px;
-    border: 2px solid #e0e6ed;
+    border: 1.5px solid #56d0d0;
     border-radius: 10px;
     font-size: 1rem;
+    background: #263053;
+    color: #e5f6fa;
     transition: all 0.3s ease;
-    background: #f8fafc;
+}
+
+.form-group input::placeholder {
+    color: #91d4d4;
 }
 
 .form-group input:focus {
     outline: none;
-    border-color: #56d0d0;
-    background: white;
-    box-shadow: 0 0 0 3px rgba(86, 208, 208, 0.1);
+    border-color: #3ab4b7;
+    background: #1e2f45;
+    box-shadow: 0 0 10px #3ab4b7;
+    color: #e5f6fa;
 }
 
 .btn-adicionar {
@@ -176,90 +185,124 @@ body {
     box-shadow: 0 5px 15px rgba(86, 208, 208, 0.3);
 }
 
-/* TABELA */
+/* TABELA CONTAINER */
 .tabela-container {
     overflow-x: auto;
-    border-radius: 12px;
-    border: 1px solid #e0e6ed;
+    border-radius: 18px;
+    background: transparent;
+    padding: 0;
+    box-shadow: 0 2px 15px rgba(35,34,74,0.14);
 }
 
+/* TABELA AZUL ESCURO INTEGRADA */
 .tabela-materiais {
     width: 100%;
-    border-collapse: collapse;
-    background: white;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #23224A;
+    border-radius: 16px;
+    color: #e5f6fa;
+    font-size: 1.06rem;
+    overflow: hidden;
 }
 
 .tabela-materiais thead {
-    background: #23224A;
+    background: #263053;
 }
 
 .tabela-materiais th {
     color: #56d0d0;
+    font-weight: 700;
     padding: 16px 20px;
     text-align: left;
-    font-weight: 600;
-    font-size: 1rem;
-    border-bottom: 2px solid #56d0d0;
+    border-bottom: 2px solid #36c3d4;
+    background: #263053;
+    font-size: 1.07rem;
 }
 
 .tabela-materiais tbody tr {
-    transition: all 0.3s ease;
-    border-bottom: 1px solid #f0f3f5;
+    background: #234567;
+    transition: background 0.2s;
+    cursor: pointer;
 }
 
+.tabela-materiais tbody tr:nth-child(even) {
+    background: #2d3663;
+}
+
+/* CORREÇÃO DO HOVER - Apenas para células de texto */
 .tabela-materiais tbody tr:hover {
-    background: #f8fafc;
+    background: #36c3d4 !important;
+}
+
+.tabela-materiais tbody tr:hover td {
+    color: #23224A !important;
+    background: #36c3d4 !important;
+}
+
+/* Inputs mantêm seu estilo mesmo no hover */
+.tabela-materiais tbody tr:hover td input {
+    background: #263053 !important;
+    color: #56d0d0 !important;
+    border-color: #56d0d0 !important;
+}
+
+.tabela-materiais tbody tr:hover td .btn-acao {
+    /* Botões mantêm seus estilos originais */
+    background: inherit !important;
+    color: inherit !important;
 }
 
 .tabela-materiais td {
     padding: 16px 20px;
-    color: #2c3e50;
+    border-bottom: 1px solid #36c3d4;
+    background: inherit;
+    transition: background 0.2s, color 0.2s;
 }
 
-.tabela-materiais form {
-    display: contents;
-}
-
-.tabela-materiais input {
+/* ESTILOS ESPECÍFICOS PARA INPUTS NA TABELA */
+.tabela-materiais td input {
     width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #e0e6ed;
-    border-radius: 6px;
-    font-size: 0.95rem;
-    background: white;
-    transition: all 0.3s ease;
+    padding: 10px 14px;
+    border: 2px solid #56d0d0;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: #263053;
+    color: #56d0d0;
+    transition: background 0.3s, border 0.3s, color 0.3s;
 }
 
-.tabela-materiais input:focus {
+.tabela-materiais td input:focus {
     outline: none;
-    border-color: #56d0d0;
-    box-shadow: 0 0 0 2px rgba(86, 208, 208, 0.1);
+    border-color: #3ab4b7;
+    background: #1e2f45;
+    color: #e5f6fa;
+    box-shadow: 0 0 8px rgba(58, 180, 183, 0.5);
 }
 
 /* BOTÕES DE AÇÃO */
 .acoes-cell {
     display: flex;
-    gap: 8px;
+    gap: 10px;
 }
 
 .btn-acao {
-    padding: 8px 16px;
+    padding: 8px 18px;
     border: none;
     border-radius: 6px;
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.3s;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
 }
 
 .btn-editar {
     background: #3498db;
     color: white;
 }
-
 .btn-editar:hover {
     background: #2980b9;
     transform: translateY(-1px);
@@ -269,7 +312,6 @@ body {
     background: #e74c3c;
     color: white;
 }
-
 .btn-deletar:hover {
     background: #c0392b;
     transform: translateY(-1px);
@@ -281,18 +323,15 @@ body {
     padding: 60px 20px;
     color: #7f8c8d;
 }
-
 .empty-icon {
     font-size: 4rem;
     margin-bottom: 20px;
     opacity: 0.3;
 }
-
 .empty-text {
     font-size: 1.2rem;
     margin-bottom: 10px;
 }
-
 .empty-subtext {
     font-size: 1rem;
     opacity: 0.7;
@@ -306,43 +345,35 @@ body {
         padding: 15px 0;
         gap: 15px;
     }
-
     .nav-links {
         gap: 15px;
         flex-wrap: wrap;
         justify-content: center;
     }
-
     .form-cadastro {
         grid-template-columns: 1fr;
         gap: 15px;
     }
-
     .page-header h1 {
         font-size: 2rem;
     }
-
     .section {
         padding: 20px;
     }
-
     .tabela-materiais {
-        font-size: 0.9rem;
+        font-size: 0.95rem;
     }
-
     .tabela-materiais th,
     .tabela-materiais td {
         padding: 12px 8px;
     }
-
     .acoes-cell {
         flex-direction: column;
-        gap: 5px;
+        gap: 8px;
     }
-
     .btn-acao {
-        padding: 6px 12px;
-        font-size: 0.85rem;
+        padding: 7px 14px;
+        font-size: 0.95rem;
     }
 }
 
@@ -350,23 +381,18 @@ body {
     .container {
         padding: 10px;
     }
-
     .section {
         padding: 15px;
     }
-
     .tabela-container {
-        border-radius: 8px;
+        border-radius: 10px;
     }
-
     .tabela-materiais {
         min-width: 500px;
     }
-
     .page-header h1 {
         font-size: 1.8rem;
     }
-
     .section h2 {
         font-size: 1.5rem;
     }
@@ -383,11 +409,9 @@ body {
         transform: translateY(0);
     }
 }
-
 .section {
     animation: fadeInUp 0.5s ease;
 }
-
 .tabela-materiais tbody tr {
     animation: fadeInUp 0.3s ease;
 }

@@ -27,9 +27,11 @@ CREATE TABLE servicos (
 -- Popular tabela servicos com valores iniciais
 INSERT INTO servicos (nome, descricao, valor, tipo, materiais, duracao) VALUES
 ('Limpeza de vidro', 'Limpeza completa de vidros em geral', 59.90, 'Limpeza', 'Produtos de limpeza', '01:00:00'),
-('Limpeza de ACM', 'Limpeza e manutenção de ACM', 79.90, 'Limpeza', 'Produtos de limpeza', '01:30:00'),
-('Limpeza de placa solar', 'Limpeza e recuperação de eficiência', 99.90, 'Limpeza', 'Produtos de limpeza', '02:00:00'),
-('Restauração de ACM', 'Recuperação e polimento de ACM danificado', 120.00, 'Restauração', 'Produtos específicos', '03:00:00');
+('Limpeza pós obra comercial', 'Limpeza intensiva após obra em ambientes comerciais', 149.90, 'Limpeza', 'Produtos especiais', '03:00:00'),
+('Limpeza pós obra residencial', 'Limpeza detalhada após obra em residências', 129.90, 'Limpeza', 'Produtos especiais', '02:30:00'),
+('Lavagem de fachada', 'Lavagem e manutenção completa de fachadas', 189.90, 'Limpeza', 'Produtos de limpeza', '04:00:00'),
+('Lavagem de ACM', 'Lavagem e manutenção de ACM na fachada', 79.90, 'Limpeza', 'Produtos de limpeza', '01:30:00'),
+('Lavagem de placas solares', 'Lavagem e recuperação de eficiência de placas solares', 99.90, 'Limpeza', 'Produtos de limpeza', '02:00:00');
 
 -- TABELA DE AGENDAMENTOS (ATUALIZADA COM TODOS OS NOVOS CAMPOS)
 CREATE TABLE agendamentos (
