@@ -133,7 +133,7 @@
 }
 
 .calendar-event:hover {
-  background: #3ab4b7;
+  background: #07c9e7;
   color: #fff;
 }
 
@@ -141,7 +141,7 @@
   position: absolute;
   top: 4px;
   right: 4px;
-  background: #47e7b6;
+  background: #07c9e7;
   color: #13132c;
   border-radius: 50%;
   width: 20px;
@@ -161,7 +161,7 @@
 }
 
 .today .day-number {
-  color: #56d0d0;
+  color: #07c9e7;
   font-weight: 800;
 }
 

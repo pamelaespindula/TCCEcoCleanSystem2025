@@ -85,7 +85,7 @@ body {
 }
 
 .page-header h1 {
-    color: #e5f6fa;
+    color: #23224A;
     font-size: 2.5rem;
     margin-bottom: 10px;
     font-weight: 700;
@@ -194,92 +194,131 @@ body {
     box-shadow: 0 2px 15px rgba(35,34,74,0.14);
 }
 
-/* TABELA AZUL ESCURO INTEGRADA */
+/* TABELA AZUL ESCURO CORRIGIDA */
 .tabela-materiais {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
+    border-collapse: collapse;
     background: #23224A;
-    border-radius: 16px;
     color: #e5f6fa;
-    font-size: 1.06rem;
+    font-size: 1rem;
+    border-radius: 8px;
     overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .tabela-materiais thead {
-    background: #263053;
+    background: #1a1a3a;
 }
 
 .tabela-materiais th {
     color: #56d0d0;
-    font-weight: 700;
+    font-weight: 600;
     padding: 16px 20px;
     text-align: left;
-    border-bottom: 2px solid #36c3d4;
-    background: #263053;
-    font-size: 1.07rem;
+    border-bottom: 2px solid #56d0d0;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .tabela-materiais tbody tr {
-    background: #234567;
-    transition: background 0.2s;
-    cursor: pointer;
+    background: #23224A;
+    transition: background-color 0.2s ease;
+    border-bottom: 1px solid #2a3b5c;
 }
 
 .tabela-materiais tbody tr:nth-child(even) {
-    background: #2d3663;
+    background: #1e1e42;
 }
 
-/* CORREÇÃO DO HOVER - Apenas para células de texto */
+/* HOVER SUAVE E CONTROLADO */
 .tabela-materiais tbody tr:hover {
-    background: #36c3d4 !important;
+    background: rgba(86, 208, 208, 0.1);
 }
 
 .tabela-materiais tbody tr:hover td {
-    color: #23224A !important;
-    background: #36c3d4 !important;
-}
-
-/* Inputs mantêm seu estilo mesmo no hover */
-.tabela-materiais tbody tr:hover td input {
-    background: #263053 !important;
-    color: #56d0d0 !important;
-    border-color: #56d0d0 !important;
-}
-
-.tabela-materiais tbody tr:hover td .btn-acao {
-    /* Botões mantêm seus estilos originais */
-    background: inherit !important;
-    color: inherit !important;
+    color: #e5f6fa;
 }
 
 .tabela-materiais td {
-    padding: 16px 20px;
-    border-bottom: 1px solid #36c3d4;
-    background: inherit;
-    transition: background 0.2s, color 0.2s;
+    padding: 14px 20px;
+    border-bottom: 1px solid #2a3b5c;
+    color: #e5f6fa;
 }
 
-/* ESTILOS ESPECÍFICOS PARA INPUTS NA TABELA */
+/* CÉLULAS DE AÇÃO ALINHADAS */
+.acoes-cell {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* BOTÕES CONSISTENTES */
+.btn-acao {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 70px;
+    justify-content: center;
+}
+
+.btn-editar {
+    background: #3498db;
+    color: white;
+}
+
+.btn-editar:hover {
+    background: #2980b9;
+    transform: translateY(-1px);
+}
+
+.btn-deletar {
+    background: #e74c3c;
+    color: white;
+}
+
+.btn-deletar:hover {
+    background: #c0392b;
+    transform: translateY(-1px);
+}
+
+/* INPUTS NA TABELA */
 .tabela-materiais td input {
     width: 100%;
-    padding: 10px 14px;
-    border: 2px solid #56d0d0;
-    border-radius: 8px;
-    font-size: 1rem;
-    background: #263053;
-    color: #56d0d0;
-    transition: background 0.3s, border 0.3s, color 0.3s;
+    padding: 8px 12px;
+    border: 1px solid #56d0d0;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    background: #1a1a3a;
+    color: #e5f6fa;
+    transition: all 0.2s ease;
 }
 
 .tabela-materiais td input:focus {
     outline: none;
     border-color: #3ab4b7;
-    background: #1e2f45;
-    color: #e5f6fa;
-    box-shadow: 0 0 8px rgba(58, 180, 183, 0.5);
+    background: #15152b;
+    box-shadow: 0 0 0 2px rgba(86, 208, 208, 0.2);
 }
 
+/* REMOVER TODOS OS ESTILOS CONFLITANTES DO HOVER ANTERIOR */
+.tabela-materiais tbody tr:hover td input {
+    background: #1a1a3a;
+    color: #e5f6fa;
+    border-color: #56d0d0;
+}
+
+.tabela-materiais tbody tr:hover .btn-acao {
+    background: inherit;
+    color: inherit;
+}
 /* BOTÕES DE AÇÃO */
 .acoes-cell {
     display: flex;
