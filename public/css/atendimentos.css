@@ -18,6 +18,56 @@
   text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
+/* NOVOS ESTILOS PARA AS SEÇÕES SEPARADAS */
+.secao-atendimentos {
+  margin-bottom: 50px;
+  transition: all 0.3s ease;
+}
+
+.secao-concluidos {
+  opacity: 0.9;
+}
+
+.secao-titulo {
+  color: #56d0d0;
+  font-size: 1.6rem;
+  font-weight: bold;
+  margin-bottom: 25px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #51c7d6;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.icone-secao {
+  font-size: 1.4em;
+}
+
+.contador-badge {
+  background: #51c7d6;
+  color: #23224A;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.9em;
+  font-weight: bold;
+  margin-left: auto;
+}
+
+.contador-badge.concluido {
+  background: #47e7b6;
+}
+
+.sem-atendimentos {
+  text-align: center;
+  padding: 40px;
+  color: #aad1e6;
+  font-style: italic;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  border: 2px dashed #3a3a6a;
+}
+
 .bloco-mes {
   margin-bottom: 42px;
   background: #2d2d59;
@@ -25,6 +75,11 @@
   padding: 28px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.2);
   border: 1px solid #3a3a6a;
+  transition: all 0.3s ease;
+}
+
+.bloco-concluido {
+  opacity: 0.8;
 }
 
 .titulo-mes {
@@ -44,7 +99,16 @@
   padding: 0;
 }
 
+.checklist-concluido .item-checklist {
+  background: rgba(86, 208, 208, 0.1);
+}
+
+.checklist-concluido .item-checklist:hover {
+  background: rgba(86, 208, 208, 0.15);
+}
+
 .item-checklist {
+  position: relative;
   display: flex;
   align-items: center;
   background: #23224A;
@@ -57,9 +121,9 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   transition: all 0.3s ease;
   border: 1px solid #3a3a6a;
-  position: relative;
-  overflow: hidden;
+  overflow: visible;
   min-height: 70px;
+  z-index: 1;
 }
 
 .item-checklist:hover {
@@ -200,6 +264,8 @@
   flex-shrink: 0;
   border: 1px solid transparent;
   line-height: 1;
+  position: relative;
+  z-index: 3;
 }
 
 .opcoes-menu:hover {
@@ -209,34 +275,39 @@
   transform: scale(1.1);
 }
 
+/* MENU DROPDOWN - CORRIGIDO PARA MÚLTIPLOS AGENDAMENTOS */
 .menu-dropdown {
   display: none;
   position: absolute;
-  top: 100%;
+  top: calc(100% + 5px);
   right: 0;
   background: #2d2d59;
   border-radius: 12px;
-  padding: 6px;
+  padding: 8px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.3);
   border: 1px solid #51c7d6;
   z-index: 1000;
-  min-width: 180px;
-  margin-top: 8px;
+  min-width: 200px;
+  margin-top: 0;
+}
+
+.menu-dropdown.visible {
+  display: block;
 }
 
 .menu-dropdown button {
   display: block;
   width: 100%;
-  padding: 10px 12px;
+  padding: 12px 16px;
   border: none;
   background: none;
   color: #fff;
   text-align: left;
   cursor: pointer;
-  border-radius: 6px;
-  font-size: 0.9em;
+  border-radius: 8px;
+  font-size: 0.95em;
   transition: all 0.3s ease;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 
 .menu-dropdown button:hover {
@@ -256,6 +327,11 @@
 .btn-excluir:hover {
   background: #ef5350 !important;
   color: #fff !important;
+}
+
+/* CORREÇÃO: Garante que o item pai tenha stacking context quando menu está aberto */
+.item-checklist:has(.menu-dropdown[style*="block"]) {
+  z-index: 1001;
 }
 
 /* Modal */
@@ -308,14 +384,150 @@
   color: #56d0d0;
 }
 
-#detalhesConteudo p {
-  margin-bottom: 12px;
-  padding: 8px 0;
-  border-bottom: 1px solid #3a3a6a;
+/* Modal de Detalhes Melhorado */
+.detalhes-content {
+  margin-top: 20px;
 }
 
-#detalhesConteudo b {
+.detalhe-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px 0;
+  border-bottom: 1px solid #3a3a6a;
+  margin-bottom: 8px;
+}
+
+.detalhe-item:last-child {
+  border-bottom: none;
+}
+
+.detalhe-item strong {
   color: #56d0d0;
+  font-weight: 600;
+  min-width: 120px;
+}
+
+.detalhe-item span {
+  color: #fff;
+  text-align: right;
+  flex: 1;
+}
+
+.observacoes {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.observacoes-texto {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 8px;
+  border-left: 3px solid #51c7d6;
+  white-space: pre-wrap;
+  line-height: 1.5;
+  width: 100%;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85em;
+  font-weight: 600;
+}
+
+.status-concluido {
+  background: rgba(86, 208, 208, 0.2);
+  color: #56d0d0;
+  border: 1px solid #56d0d0;
+}
+
+.status-pendente {
+  background: rgba(255, 165, 38, 0.2);
+  color: #ffa726;
+  border: 1px solid #ffa726;
+}
+
+/* Modal de Alteração */
+.form-alterar {
+  margin-top: 20px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  color: #56d0d0;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 1em;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 12px 16px;
+  background: #2d2d59;
+  border: 2px solid #3a3a6a;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 1em;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #51c7d6;
+  box-shadow: 0 0 0 3px rgba(81, 199, 214, 0.2);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+  font-family: inherit;
+}
+
+.form-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 30px;
+}
+
+.btn-salvar,
+.btn-cancelar {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1em;
+}
+
+.btn-salvar {
+  background: #51c7d6;
+  color: #23224A;
+}
+
+.btn-salvar:hover {
+  background: #3ab4b7;
+  transform: translateY(-2px);
+}
+
+.btn-cancelar {
+  background: #6c757d;
+  color: #fff;
+}
+
+.btn-cancelar:hover {
+  background: #5a6268;
+  transform: translateY(-2px);
 }
 
 /* Efeito de pulso quando marca como concluído */
@@ -358,6 +570,18 @@
     padding: 24px 16px;
     margin: 16px 8px;
     width: auto;
+  }
+  
+  .secao-titulo {
+    font-size: 1.4rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .contador-badge {
+    margin-left: 0;
+    align-self: flex-start;
   }
   
   .bloco-mes {
@@ -413,6 +637,11 @@
     font-size: 0.75em;
     padding: 3px 6px;
   }
+  
+  /* CORREÇÃO RESPONSIVA: Remove z-index em mobile */
+  .item-checklist:has(.menu-dropdown[style*="block"]) {
+    z-index: 1;
+  }
 }
 
 @media (max-width: 480px) {
@@ -424,6 +653,10 @@
   .atendimentos-titulo {
     font-size: 1.6rem;
     margin-bottom: 24px;
+  }
+  
+  .secao-titulo {
+    font-size: 1.3rem;
   }
   
   .bloco-mes {
@@ -454,6 +687,20 @@
     margin-left: 0;
     margin-top: 6px;
   }
+  
+  .menu-dropdown {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 280px;
+  }
+  
+  .sem-atendimentos {
+    padding: 30px 20px;
+    font-size: 0.9em;
+  }
 }
 
 /* Animações suaves */
@@ -470,4 +717,11 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Transições suaves para movimento entre seções */
+.secao-atendimentos,
+.bloco-mes,
+.item-checklist {
+  transition: all 0.3s ease;
 }

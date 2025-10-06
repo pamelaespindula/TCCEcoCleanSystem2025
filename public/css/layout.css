@@ -1,26 +1,81 @@
-/* Estilo base da página */
+/* RESET MODERNO COMPLETO */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+}
+
 body {
-  font-family: 'Arial', sans-serif;
-  background: linear-gradient(135deg, #51c7d6 0%, #23255a 100%);
-  margin: 0;
-  color: #fff;
-  min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    min-width: 100vw;
+    height: 100vh;
+    width: 100vw;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #36c3d4 0%, #234567 100%) fixed !important;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
 }
 
-/* Container principal da página */
+/* CONTAINER PRINCIPAL - TRANSPARENTE */
 .main-container {
-  padding-top: 100px; /* Espaço para a navbar fixa (70px + margem) */
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
-  box-sizing: border-box;
+    background: transparent !important;
+    min-height: 100vh;
+    padding: 20px;
 }
 
-/* Outros estilos gerais, resets ou para elementos comuns podem ir aqui */
+/* SEÇÕES E CARDS COM FUNDO BRANCO */
+.section,
+.card,
+.quadro-atendimentos,
+.tabela-container {
+    background: white !important;
+    border-radius: 16px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
 
-/* Exemplo de reset para links sem interferir no nav */
-a {
-  color: inherit;
-  text-decoration: none;
-  cursor: pointer;
+.quadro-atendimentos {
+    border-radius: 20px;
+}
+
+.page-header {
+    background: transparent !important;
+}
+
+.page-header h1 {
+    color: white !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.page-subtitle {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Garante que imagens e blocos não vazem largura/altura */
+img, picture, video, canvas, svg {
+    display: block;
+    max-width: 100%;
+}
+
+input, button, textarea, select {
+    font-family: inherit;
+    font-size: inherit;
+}
+
+p, h1, h2, h3, h4, h5, h6 {
+    overflow-wrap: break-word;
 }

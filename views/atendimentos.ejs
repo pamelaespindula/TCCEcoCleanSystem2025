@@ -13,95 +13,262 @@
   <main class="main-container">
     <section class="atendimentos-section">
       <h1 class="atendimentos-titulo">Checklist de Atendimentos</h1>
+      
       <%
-        atendimentos.sort((a,b) => new Date(a.data_agendada + 'T' + a.hora_agendada) - new Date(b.data_agendada + 'T' + b.hora_agendada));
-        const meses = {};
-        atendimentos.forEach(a => {
-          let dataStr = '';
-          if (typeof a.data_agendada === 'string') {
-            dataStr = a.data_agendada;
-          } else if (a.data_agendada instanceof Date) {
-            const y = a.data_agendada.getFullYear();
-            const m = (a.data_agendada.getMonth()+1).toString().padStart(2,'0');
-            const d = a.data_agendada.getDate().toString().padStart(2,'0');
-            dataStr = `${y}-${m}-${d}`;
-          } else {
-            dataStr = String(a.data_agendada);
-          }
-          const [ano, mes] = dataStr.split('-');
-          const chave = `${mes}/${ano}`;
-          if (!meses[chave]) meses[chave] = [];
-          meses[chave].push({...a, dataStr});
-        });
+        // Separar atendimentos pendentes e concluídos
+        const atendimentosPendentes = atendimentos.filter(a => a.status !== 'concluído');
+        const atendimentosConcluidos = atendimentos.filter(a => a.status === 'concluído');
+        
+        // Função para agrupar por mês
+        function agruparPorMes(atendimentosArray) {
+          const meses = {};
+          
+          atendimentosArray.forEach(a => {
+            let dataStr = '';
+            if (typeof a.data_agendada === 'string') {
+              dataStr = a.data_agendada.split('T')[0];
+            } else if (a.data_agendada instanceof Date) {
+              const y = a.data_agendada.getFullYear();
+              const m = (a.data_agendada.getMonth()+1).toString().padStart(2,'0');
+              const d = a.data_agendada.getDate().toString().padStart(2,'0');
+              dataStr = `${y}-${m}-${d}`;
+            } else {
+              dataStr = String(a.data_agendada);
+            }
+            const [ano, mes] = dataStr.split('-');
+            const chave = `${mes}/${ano}`;
+            if (!meses[chave]) meses[chave] = [];
+            meses[chave].push({...a, dataStr});
+          });
 
-        Object.keys(meses).sort((a,b) => {
-          const [mesA,anoA] = a.split('/');
-          const [mesB,anoB] = b.split('/');
-          if (anoA !== anoB) return anoA - anoB;
-          return mesA - mesB;
-        }).forEach(mesAno => {
+          return meses;
+        }
+
+        const mesesPendentes = agruparPorMes(atendimentosPendentes);
+        const mesesConcluidos = agruparPorMes(atendimentosConcluidos);
       %>
-      <div class="bloco-mes">
-        <h2 class="titulo-mes"><%= (() => {
-          const [mes, ano] = mesAno.split('/');
-          const mesesNome = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-          return `${mesesNome[parseInt(mes)-1]} / ${ano}`;
-        })() %></h2>
-        <ul class="checklist">
-          <% meses[mesAno].forEach(atendimento => { %>
-            <li class="item-checklist <%= atendimento.status === 'concluído' ? 'concluido' : '' %>">
-              <label>
-                <input type="checkbox" class="check-atendimento" data-id="<%= atendimento.id %>" <% if(atendimento.status === 'concluído') { %> checked <% } %> />
-                <span class="checkbox-custom"></span>
-                <span class="descricao">
-                  <b><%= atendimento.nome_servico %></b>
-                  <span class="info-data-hora"><%= atendimento.dataStr.split('-').reverse().join('/') %> • <%= atendimento.hora_agendada.split(':').slice(0,2).join(':') %></span>
-                  <% if(atendimento.observacoes && atendimento.observacoes.trim() !== '') { %>
-                    <span class="obs-menor"><b>Observações:</b> <%= atendimento.observacoes.length > 60 ? atendimento.observacoes.substring(0,60) + '...' : atendimento.observacoes %></span>
-                  <% } %>
-                </span>
-              </label>
-              <div class="opcoes-menu" tabindex="0" aria-label="Mais opções">&#8230;</div>
-              <div class="menu-dropdown" style="display:none;">
-                <button class="btn-ver-detalhes" data-id="<%= atendimento.id %>">Ver detalhes</button>
-                <button class="btn-alterar" data-id="<%= atendimento.id %>">Alterar agendamento</button>
-                <button class="btn-excluir" data-id="<%= atendimento.id %>">Excluir agendamento</button>
-              </div>
-            </li>
-          <% }) %>
-        </ul>
+
+      <!-- SEÇÃO DE ATENDIMENTOS PENDENTES -->
+      <div class="secao-atendimentos">
+        <h2 class="secao-titulo">
+          Atendimentos Pendentes
+          <span class="contador-badge"><%= atendimentosPendentes.length %></span>
+        </h2>
+        
+        <% if (atendimentosPendentes.length === 0) { %>
+          <div class="sem-atendimentos">
+            <p>Todos os atendimentos estão concluídos!</p>
+          </div>
+        <% } else { %>
+          <% 
+          Object.keys(mesesPendentes).sort((a,b) => {
+            const [mesA,anoA] = a.split('/');
+            const [mesB,anoB] = b.split('/');
+            if (anoA !== anoB) return anoA - anoB;
+            return mesA - mesB;
+          }).forEach(mesAno => {
+          %>
+          <div class="bloco-mes">
+            <h3 class="titulo-mes"><%= (() => {
+              const [mes, ano] = mesAno.split('/');
+              const mesesNome = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+              return `${mesesNome[parseInt(mes)-1]} / ${ano}`;
+            })() %></h3>
+            <ul class="checklist">
+              <% mesesPendentes[mesAno].forEach(atendimento => { %>
+                <li class="item-checklist">
+                  <label>
+                    <input type="checkbox" class="check-atendimento" data-id="<%= atendimento.id %>" />
+                    <span class="checkbox-custom"></span>
+                    <span class="descricao">
+                      <b><%= atendimento.nome_servico %></b>
+                      <span class="info-data-hora">
+                        <%= atendimento.dataStr.split('-').reverse().join('/') %> • 
+                        <%= atendimento.hora_agendada ? atendimento.hora_agendada.split(':').slice(0,2).join(':') : '' %> • 
+                        <strong><%= atendimento.nome_cliente %></strong>
+                      </span>
+                      <% if(atendimento.empresa && atendimento.empresa.trim() !== '') { %>
+                        <span class="obs-menor"><b>Empresa:</b> <%= atendimento.empresa %></span>
+                      <% } %>
+                      <% if(atendimento.telefone && atendimento.telefone.trim() !== '') { %>
+                        <span class="obs-menor"><b>Telefone:</b> <%= atendimento.telefone %></span>
+                      <% } %>
+                      <% if(atendimento.observacoes && atendimento.observacoes.trim() !== '') { %>
+                        <span class="obs-menor"><b>Observações:</b> <%= atendimento.observacoes.length > 60 ? atendimento.observacoes.substring(0,60) + '...' : atendimento.observacoes %></span>
+                      <% } %>
+                    </span>
+                  </label>
+                  <div class="opcoes-menu" tabindex="0" aria-label="Mais opções">&#8230;</div>
+                  <div class="menu-dropdown" style="display:none;">
+                    <button class="btn-ver-detalhes" data-id="<%= atendimento.id %>">Ver detalhes</button>
+                    <button class="btn-alterar" data-id="<%= atendimento.id %>">Alterar agendamento</button>
+                    <button class="btn-excluir" data-id="<%= atendimento.id %>">Excluir agendamento</button>
+                  </div>
+                </li>
+              <% }) %>
+            </ul>
+          </div>
+          <% }); %>
+        <% } %>
       </div>
-      <% }); %>
+
+      <!-- SEÇÃO DE ATENDIMENTOS CONCLUÍDOS -->
+      <div class="secao-atendimentos secao-concluidos">
+        <h2 class="secao-titulo">
+          Atendimentos Concluídos
+          <span class="contador-badge concluido"><%= atendimentosConcluidos.length %></span>
+        </h2>
+        
+        <% if (atendimentosConcluidos.length === 0) { %>
+          <div class="sem-atendimentos">
+            <p>Nenhum atendimento concluído ainda.</p>
+          </div>
+        <% } else { %>
+          <% 
+          Object.keys(mesesConcluidos).sort((a,b) => {
+            const [mesA,anoA] = a.split('/');
+            const [mesB,anoB] = b.split('/');
+            if (anoA !== anoB) return anoB - anoA; // Ordem decrescente para concluídos
+            return mesB - mesA;
+          }).forEach(mesAno => {
+          %>
+          <div class="bloco-mes bloco-concluido">
+            <h3 class="titulo-mes"><%= (() => {
+              const [mes, ano] = mesAno.split('/');
+              const mesesNome = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+              return `${mesesNome[parseInt(mes)-1]} / ${ano}`;
+            })() %></h3>
+            <ul class="checklist checklist-concluido">
+              <% mesesConcluidos[mesAno].forEach(atendimento => { %>
+                <li class="item-checklist concluido">
+                  <label>
+                    <input type="checkbox" class="check-atendimento" data-id="<%= atendimento.id %>" checked />
+                    <span class="checkbox-custom"></span>
+                    <span class="descricao">
+                      <b><%= atendimento.nome_servico %></b>
+                      <span class="info-data-hora">
+                        <%= atendimento.dataStr.split('-').reverse().join('/') %> • 
+                        <%= atendimento.hora_agendada ? atendimento.hora_agendada.split(':').slice(0,2).join(':') : '' %> • 
+                        <strong><%= atendimento.nome_cliente %></strong>
+                      </span>
+                      <% if(atendimento.empresa && atendimento.empresa.trim() !== '') { %>
+                        <span class="obs-menor"><b>Empresa:</b> <%= atendimento.empresa %></span>
+                      <% } %>
+                      <% if(atendimento.telefone && atendimento.telefone.trim() !== '') { %>
+                        <span class="obs-menor"><b>Telefone:</b> <%= atendimento.telefone %></span>
+                      <% } %>
+                      <% if(atendimento.observacoes && atendimento.observacoes.trim() !== '') { %>
+                        <span class="obs-menor"><b>Observações:</b> <%= atendimento.observacoes.length > 60 ? atendimento.observacoes.substring(0,60) + '...' : atendimento.observacoes %></span>
+                      <% } %>
+                    </span>
+                  </label>
+                  <div class="opcoes-menu" tabindex="0" aria-label="Mais opções">&#8230;</div>
+                  <div class="menu-dropdown" style="display:none;">
+                    <button class="btn-ver-detalhes" data-id="<%= atendimento.id %>">Ver detalhes</button>
+                    <button class="btn-alterar" data-id="<%= atendimento.id %>">Alterar agendamento</button>
+                    <button class="btn-excluir" data-id="<%= atendimento.id %>">Excluir agendamento</button>
+                  </div>
+                </li>
+              <% }) %>
+            </ul>
+          </div>
+          <% }); %>
+        <% } %>
+      </div>
     </section>
   </main>
 
-  <!-- Modal detalhes -->
+  <!-- Modal Detalhes -->
   <div id="modalDetalhes" class="modal" style="display:none;">
     <div class="modal-content">
       <span class="close">&times;</span>
       <h3>Detalhes do Agendamento</h3>
-      <div id="detalhesConteudo"></div>
+      <div id="detalhesConteudo" class="detalhes-content"></div>
+    </div>
+  </div>
+
+  <!-- Modal Alterar -->
+  <div id="modalAlterar" class="modal" style="display:none;">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h3>Alterar Agendamento</h3>
+      <form id="formAlterar" class="form-alterar">
+        <input type="hidden" id="alterarId" name="id">
+        
+        <div class="form-group">
+          <label for="alterarData">Data:</label>
+          <input type="date" id="alterarData" name="data_agendada" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="alterarHora">Hora:</label>
+          <input type="time" id="alterarHora" name="hora_agendada" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="alterarObservacoes">Observações:</label>
+          <textarea id="alterarObservacoes" name="observacoes" rows="4" placeholder="Digite as observações..."></textarea>
+        </div>
+        
+        <div class="form-buttons">
+          <button type="submit" class="btn-salvar">Salvar Alterações</button>
+          <button type="button" class="btn-cancelar" onclick="fecharModal('modalAlterar')">Cancelar</button>
+        </div>
+      </form>
     </div>
   </div>
 
 <script>
+// Variáveis globais
+let atendimentoAtual = null;
+
+// Funções para abrir/fechar modais
+function abrirModal(modalId) {
+  document.getElementById(modalId).style.display = 'flex';
+}
+
+function fecharModal(modalId) {
+  document.getElementById(modalId).style.display = 'none';
+  document.querySelectorAll('.menu-dropdown').forEach(menu => {
+    menu.style.display = 'none';
+    menu.closest('.item-checklist')?.style.removeProperty('z-index');
+  });
+}
+
+// Fechar modais ao clicar no X ou fora
+document.querySelectorAll('.close').forEach(closeBtn => {
+  closeBtn.onclick = function() {
+    this.closest('.modal').style.display = 'none';
+  };
+});
+
+window.onclick = function(e) {
+  if (e.target.classList.contains('modal')) {
+    e.target.style.display = 'none';
+  }
+};
+
 document.addEventListener('DOMContentLoaded', function() {
-  // Abrir/fechar menu "..." nos três pontinhos
+  // CORREÇÃO DO MENU DROPDOWN - AGORA 100% FUNCIONAL COM MÚLTIPLOS AGENDAMENTOS!
   document.querySelectorAll('.opcoes-menu').forEach(btn => {
     btn.addEventListener('click', function(e) {
       e.stopPropagation();
-      // Fecha todos os menus abertos, menos o do botão clicado
+      
+      // Fecha todos os outros menus primeiro e reseta z-index
       document.querySelectorAll('.menu-dropdown').forEach(menu => {
-        if(menu !== btn.nextElementSibling) {
-          menu.style.display = 'none';
-        }
-      });
-      // Toggle do menu do botão clicado
-      const menu = btn.nextElementSibling;
-      if(menu.style.display === 'block') {
         menu.style.display = 'none';
+        menu.closest('.item-checklist')?.style.removeProperty('z-index');
+      });
+      
+      const menu = this.nextElementSibling;
+      const itemPai = this.closest('.item-checklist');
+      
+      if (menu.style.display === 'block') {
+        menu.style.display = 'none';
+        itemPai.style.removeProperty('z-index');
       } else {
         menu.style.display = 'block';
+        itemPai.style.zIndex = '1001'; 
       }
     });
   });
@@ -110,6 +277,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('click', function() {
     document.querySelectorAll('.menu-dropdown').forEach(menu => {
       menu.style.display = 'none';
+      menu.closest('.item-checklist')?.style.removeProperty('z-index');
     });
   });
 
@@ -118,64 +286,198 @@ document.addEventListener('DOMContentLoaded', function() {
     menu.addEventListener('click', e => e.stopPropagation());
   });
 
-  // Checkbox: marcar concluído
+  // Checkbox: marcar concluído (ATUALIZADO PARA MOVER ENTRE SEÇÕES)
   document.querySelectorAll('.check-atendimento').forEach(chk => {
     chk.addEventListener('change', async e => {
       const id = e.target.getAttribute('data-id');
       const status = e.target.checked ? 'concluído' : 'pendente';
-      await fetch('/atendimentos/' + id, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
-      });
-      e.target.closest('.item-checklist').classList.toggle('concluido', e.target.checked);
-    });
-  });
-
-  // Botões menu funcional
-  const modal = document.getElementById('modalDetalhes');
-  const modalContent = document.getElementById('detalhesConteudo');
-  const closeBtn = modal.querySelector('.close');
-  closeBtn.onclick = () => modal.style.display = 'none';
-  window.onclick = e => { if (e.target == modal) modal.style.display = 'none'; };
-
-  // Ver detalhes
-  document.querySelectorAll('.btn-ver-detalhes').forEach(btn => {
-    btn.addEventListener('click', async e => {
-      const id = btn.getAttribute('data-id');
-      const response = await fetch('/atendimentos/' + id);
-      const json = await response.json();
-      modalContent.innerHTML = `
-        <p><b>Serviço:</b> ${json.nome_servico}</p>
-        <p><b>Data:</b> ${(json.data_agendada || '').split('-').reverse().join('/') }</p>
-        <p><b>Hora:</b> ${json.hora_agendada ? json.hora_agendada.split(':').slice(0,2).join(':') : ''}</p>
-        <p><b>Status:</b> ${json.status || ''}</p>
-        <p><b>Observações:</b><br>${(json.observacoes||'').replace(/[\n\r]+/g,'<br>')}</p>
-      `;
-      modal.style.display = 'flex';
-      document.querySelectorAll('.menu-dropdown').forEach(menu => {
-        menu.style.display = 'none';
-      });
-    });
-  });
-
-  // Excluir atendimento
-  document.querySelectorAll('.btn-excluir').forEach(btn => {
-    btn.addEventListener('click', async e => {
-      const id = btn.getAttribute('data-id');
-      if (confirm('Confirma exclusão do agendamento?')) {
-        await fetch('/atendimentos/' + id, { method: 'DELETE' });
-        location.reload();
+      const item = e.target.closest('.item-checklist');
+      
+      try {
+        const response = await fetch('/atendimentos/' + id, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status })
+        });
+        
+        if (response.ok) {
+          // Recarrega a página para atualizar as seções
+          setTimeout(() => {
+            location.reload();
+          }, 500);
+        } else {
+          alert('Erro ao atualizar status');
+          e.target.checked = !e.target.checked; // Reverte o checkbox
+        }
+      } catch (error) {
+        console.error('Erro:', error);
+        alert('Erro ao atualizar status');
+        e.target.checked = !e.target.checked; // Reverte o checkbox
       }
     });
   });
 
-  // Alterar atendimento (redireciona para editar)
-  document.querySelectorAll('.btn-alterar').forEach(btn => {
-    btn.addEventListener('click', e => {
-      const id = btn.getAttribute('data-id');
-      window.location.href = '/atendimentos/editar/' + id;
+  // VER DETALHES (ATUALIZADO COM NOVOS CAMPOS)
+  document.querySelectorAll('.btn-ver-detalhes').forEach(btn => {
+    btn.addEventListener('click', async function() {
+      const id = this.getAttribute('data-id');
+      
+      try {
+        const response = await fetch('/atendimentos/' + id);
+        if (!response.ok) throw new Error('Erro ao buscar dados');
+        
+        const atendimento = await response.json();
+        
+        // CORREÇÃO DA FORMATAÇÃO DA DATA
+        let dataFormatada = 'Não informada';
+        if (atendimento.data_agendada) {
+          const dataLimpa = atendimento.data_agendada.split('T')[0];
+          dataFormatada = dataLimpa.split('-').reverse().join('/');
+        }
+        
+        // Formata a hora (remove segundos)
+        const horaFormatada = atendimento.hora_agendada ? 
+          atendimento.hora_agendada.split(':').slice(0,2).join(':') : 'Não informada';
+        
+        document.getElementById('detalhesConteudo').innerHTML = `
+          <div class="detalhe-item">
+            <strong>Serviço:</strong>
+            <span>${atendimento.nome_servico || 'Não informado'}</span>
+          </div>
+          <div class="detalhe-item">
+            <strong>Cliente:</strong>
+            <span>${atendimento.nome_cliente || 'Não informado'}</span>
+          </div>
+          ${atendimento.empresa ? `
+          <div class="detalhe-item">
+            <strong>Empresa:</strong>
+            <span>${atendimento.empresa}</span>
+          </div>
+          ` : ''}
+          ${atendimento.telefone ? `
+          <div class="detalhe-item">
+            <strong>Telefone:</strong>
+            <span>${atendimento.telefone}</span>
+          </div>
+          ` : ''}
+          <div class="detalhe-item">
+            <strong>Data:</strong>
+            <span>${dataFormatada}</span>
+          </div>
+          <div class="detalhe-item">
+            <strong>Hora:</strong>
+            <span>${horaFormatada}</span>
+          </div>
+          <div class="detalhe-item">
+            <strong>Status:</strong>
+            <span class="status-badge ${atendimento.status === 'concluído' ? 'status-concluido' : 'status-pendente'}">
+              ${atendimento.status || 'Pendente'}
+            </span>
+          </div>
+          <div class="detalhe-item observacoes">
+            <strong>Observações:</strong>
+            <div class="observacoes-texto">${atendimento.observacoes || 'Nenhuma observação cadastrada.'}</div>
+          </div>
+        `;
+        
+        abrirModal('modalDetalhes');
+        
+      } catch (error) {
+        console.error('Erro:', error);
+        alert('Erro ao carregar detalhes do agendamento');
+      }
     });
+  });
+
+  // ALTERAR AGENDAMENTO
+  document.querySelectorAll('.btn-alterar').forEach(btn => {
+    btn.addEventListener('click', async function() {
+      const id = this.getAttribute('data-id');
+      
+      try {
+        const response = await fetch('/atendimentos/' + id);
+        if (!response.ok) throw new Error('Erro ao buscar dados');
+        
+        const atendimento = await response.json();
+        
+        // CORREÇÃO: Limpa timezone da data para preencher o input
+        let dataParaInput = atendimento.data_agendada || '';
+        if (dataParaInput.includes('T')) {
+          dataParaInput = dataParaInput.split('T')[0];
+        }
+        
+        // Preenche o formulário com os dados atuais
+        document.getElementById('alterarId').value = atendimento.id;
+        document.getElementById('alterarData').value = dataParaInput;
+        document.getElementById('alterarHora').value = atendimento.hora_agendada || '';
+        document.getElementById('alterarObservacoes').value = atendimento.observacoes || '';
+        
+        abrirModal('modalAlterar');
+        
+      } catch (error) {
+        console.error('Erro:', error);
+        alert('Erro ao carregar dados para alteração');
+      }
+    });
+  });
+
+  // EXCLUIR AGENDAMENTO
+  document.querySelectorAll('.btn-excluir').forEach(btn => {
+    btn.addEventListener('click', async function() {
+      const id = this.getAttribute('data-id');
+      if (confirm('Tem certeza que deseja excluir este agendamento?')) {
+        try {
+          const response = await fetch('/atendimentos/' + id, { 
+            method: 'DELETE' 
+          });
+          
+          if (response.ok) {
+            alert('Agendamento excluído com sucesso!');
+            location.reload();
+          } else {
+            alert('Erro ao excluir agendamento');
+          }
+        } catch (error) {
+          console.error('Erro:', error);
+          alert('Erro ao excluir agendamento');
+        }
+      }
+    });
+  });
+
+  // SUBMIT do formulário de alteração
+  document.getElementById('formAlterar').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const dados = {
+      id: formData.get('id'),
+      data_agendada: formData.get('data_agendada'),
+      hora_agendada: formData.get('hora_agendada'),
+      observacoes: formData.get('observacoes')
+    };
+    
+    try {
+      const response = await fetch('/atendimentos/alterar', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(dados)
+      });
+      
+      if (response.ok) {
+        alert('Agendamento atualizado com sucesso!');
+        fecharModal('modalAlterar');
+        location.reload();
+      } else {
+        const erro = await response.json();
+        alert('Erro ao atualizar: ' + (erro.message || 'Erro desconhecido'));
+      }
+    } catch (error) {
+      console.error('Erro:', error);
+      alert('Erro ao atualizar agendamento');
+    }
   });
 });
 </script>

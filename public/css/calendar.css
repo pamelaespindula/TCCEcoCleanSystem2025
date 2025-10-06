@@ -11,7 +11,7 @@
   padding: 32px 42px;
   box-shadow: 0 8px 28px #13132c50;
   width: 100%;
-  max-width: 680px;
+  max-width: 900px;
 }
 
 .calendar-header {
@@ -61,9 +61,9 @@
 #calendar {
   width: 100%;
   border-collapse: separate;
-  border-spacing: 8px;
+  border-spacing: 4px;
   color: #fff;
-  font-size: 1.16rem;
+  font-size: 1rem;
 }
 
 #calendar th {
@@ -71,28 +71,37 @@
   padding: 12px 0;
   font-weight: bold;
   color: #51c7d6;
-  font-size: 1.1rem;
+  font-size: 1rem;
+  height: 40px;
 }
 
 #calendar td {
   background: #2d2d59;
-  border-radius: 12px;
-  width: 48px;
-  height: 48px;
-  text-align: center;
-  vertical-align: middle;
-  font-weight: bold;
+  border-radius: 8px;
+  width: 120px;
+  height: 100px;
+  text-align: left;
+  vertical-align: top;
+  font-weight: normal;
   cursor: pointer;
   transition: background 0.25s;
   position: relative;
+  padding: 4px;
+  border: 2px solid transparent;
+}
+
+#calendar td:hover {
+  background: #3a3a6a;
+  border-color: #51c7d6;
 }
 
 #calendar td.today {
-  background: #56d0d0;
-  color: #191a42;
+  background: rgba(86, 208, 208, 0.2);
+  border: 2px solid #56d0d0;
 }
 
 #calendar td.event-day {
+  background: rgba(81, 199, 214, 0.15);
   border: 2px solid #51c7d6;
 }
 
@@ -102,9 +111,172 @@
   cursor: default;
 }
 
+#calendar td.disabled:hover {
+  background: transparent;
+  border-color: transparent;
+}
+
+/* ESTILOS DOS EVENTOS NO CALENDÁRIO */
+.calendar-event {
+  background: #51c7d6;
+  color: #191a42;
+  border-radius: 4px;
+  padding: 2px 6px;
+  margin: 1px 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  border-left: 3px solid #3ab4b7;
+}
+
+.calendar-event:hover {
+  background: #3ab4b7;
+  color: #fff;
+}
+
+.event-indicator {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #47e7b6;
+  color: #13132c;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: bold;
+}
+
+.day-number {
+  font-weight: bold;
+  font-size: 1em;
+  margin-bottom: 2px;
+  color: #fff;
+}
+
+.today .day-number {
+  color: #56d0d0;
+  font-weight: 800;
+}
+
+/* MODAL ESTILOS */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #23224A;
+  padding: 25px;
+  border-radius: 16px;
+  max-width: 500px;
+  width: 90%;
+  color: white;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  border: 2px solid #51c7d6;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  color: #56d0d0;
+  border-bottom: 2px solid #51c7d6;
+  padding-bottom: 10px;
+  text-align: center;
+}
+
+.events-list {
+  max-height: 400px;
+  overflow-y: auto;
+  margin: 15px 0;
+}
+
+.event-item {
+  background: #2d2d59;
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 8px;
+  border-left: 4px solid #51c7d6;
+}
+
+.event-service {
+  color: #56d0d0;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.event-time {
+  float: right;
+  color: #aad1e6;
+  font-weight: 500;
+}
+
+.event-client {
+  color: #fff;
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+.event-observations {
+  color: #b5e6eb;
+  font-size: 0.8rem;
+  margin-top: 6px;
+  font-style: italic;
+}
+
+.close-modal {
+  width: 100%;
+  padding: 12px;
+  background: #51c7d6;
+  color: #191a42;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: background 0.3s;
+  margin-top: 10px;
+}
+
+.close-modal:hover {
+  background: #3ab4b7;
+}
+
 /* Remove qualquer margem/padding extra */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+/* Scrollbar personalizada */
+.events-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.events-list::-webkit-scrollbar-track {
+  background: #2d2d59;
+  border-radius: 3px;
+}
+
+.events-list::-webkit-scrollbar-thumb {
+  background: #51c7d6;
+  border-radius: 3px;
+}
+
+.events-list::-webkit-scrollbar-thumb:hover {
+  background: #3ab4b7;
 }

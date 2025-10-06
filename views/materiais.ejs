@@ -1,43 +1,132 @@
-<header>
-  <h1>Gerenciamento de Materiais</h1>
-</header>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Materiais</title>
+    <link rel="stylesheet" href="/css/materiais.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-content">
+            <a href="/" class="logo">
+                <i class="fas fa-boxes"></i>
+                Sistema de Gestão
+            </a>
+            <ul class="nav-links">
+                <li><a href="/"><i class="fas fa-home"></i> Início</a></li>
+                <li><a href="/agendamentos"><i class="fas fa-calendar-alt"></i> Agendamentos</a></li>
+                <li><a href="/materiais" class="active"><i class="fas fa-tools"></i> Materiais</a></li>
+                <% if (usuario) { %>
+                    <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
+                <% } %>
+            </ul>
+        </div>
+    </nav>
 
-<section>
-  <h2>Cadastrar novo material</h2>
-  <form action="/materiais" method="POST">
-    <label for="nome">Nome do material:</label>
-    <input type="text" id="nome" name="nome" required />
+    <div class="container">
+        <!-- Header -->
+        <header class="page-header">
+            <h1><i class="fas fa-tools"></i> Gerenciamento de Materiais</h1>
+            <p class="page-subtitle">Controle e gestão de materiais em estoque</p>
+        </header>
 
-    <label for="quantidade">Quantidade:</label>
-    <input type="number" id="quantidade" name="quantidade" required min="0" />
+        <!-- Seção de Cadastro -->
+        <section class="section">
+            <h2><i class="fas fa-plus-circle"></i> Cadastrar Novo Material</h2>
+            <form class="form-cadastro" action="/materiais" method="POST">
+                <div class="form-group">
+                    <label for="nome">Nome do Material</label>
+                    <input type="text" id="nome" name="nome" placeholder="Digite o nome do material" required>
+                </div>
+                <div class="form-group">
+                    <label for="quantidade">Quantidade</label>
+                    <input type="number" id="quantidade" name="quantidade" placeholder="0" required min="0">
+                </div>
+                <button type="submit" class="btn-adicionar">
+                    <i class="fas fa-plus"></i> Adicionar Material
+                </button>
+            </form>
+        </section>
 
-    <button type="submit">Adicionar Material</button>
-  </form>
-</section>
+        <!-- Seção de Lista -->
+        <section class="section">
+            <h2><i class="fas fa-clipboard-list"></i> Lista de Materiais</h2>
+            
+            <% if (materiais.length > 0) { %>
+                <div class="tabela-container">
+                    <table class="tabela-materiais">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Quantidade</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% materiais.forEach(material => { %>
+                                <tr>
+                                    <form action="/materiais/editar/<%= material.id %>" method="POST">
+                                    <td>
+                                        <input type="text" name="nome" value="<%= material.nome %>" required>
+                                    </td>
+                                    <td>
+                                        <input type="number" name="quantidade" value="<%= material.quantidade %>" required min="0">
+                                    </td>
+                                    <td class="acoes-cell">
+                                        <button type="submit" class="btn-acao btn-editar">
+                                            <i class="fas fa-edit"></i> Editar
+                                        </button>
+                                        <button type="button" 
+                                                class="btn-acao btn-deletar" 
+                                                onclick="confirmarExclusao('<%= material.id %>', '<%= material.nome %>')">
+                                            <i class="fas fa-trash"></i> Deletar
+                                        </button>
+                                    </td>
+                                    </form>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } else { %>
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-box-open"></i>
+                    </div>
+                    <div class="empty-text">Nenhum material cadastrado</div>
+                    <div class="empty-subtext">Adicione seu primeiro material usando o formulário acima</div>
+                </div>
+            <% } %>
+        </section>
+    </div>
 
-<section>
-  <h2>Lista de Materiais</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Nome</th>
-        <th>Quantidade</th>
-        <th>Ações</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% materiais.forEach(material => { %>
-        <tr>
-          <form action="/materiais/editar/<%= material.id %>" method="POST">
-          <td><input type="text" name="nome" value="<%= material.nome %>" required /></td>
-          <td><input type="number" name="quantidade" value="<%= material.quantidade %>" required min="0" /></td>
-          <td>
-            <button type="submit">Editar</button>
-            <button formaction="/materiais/deletar/<%= material.id %>" formmethod="POST" onclick="return confirm('Confirma exclusão?');">Deletar</button>
-          </td>
-          </form>
-        </tr>
-      <% }) %>
-    </tbody>
-  </table>
-</section>
+    <!-- Modal de Confirmação (simplificado) -->
+    <script>
+        function confirmarExclusao(id, nome) {
+            if (confirm(`Tem certeza que deseja excluir o material "${nome}"?`)) {
+                // Cria um formulário temporário para enviar a requisição DELETE
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/materiais/deletar/${id}`;
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        // Adiciona validação para evitar números negativos
+        document.addEventListener('DOMContentLoaded', function() {
+            const quantidadeInputs = document.querySelectorAll('input[type="number"]');
+            quantidadeInputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    if (this.value < 0) {
+                        this.value = 0;
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

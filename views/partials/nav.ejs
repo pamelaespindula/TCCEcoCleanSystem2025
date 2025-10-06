@@ -1,14 +1,46 @@
-<nav class="topbar">
-  <div class="topbar-left">
-    <img src="/img/seu-logo.png" alt="EcoCleanSystem Logo" class="logo" />
-    <div class="topnav">
-      <a href="/dashboard" class="<%= activePage === 'dashboard' ? 'active' : '' %>">Agenda</a>
-      <a href="/agendamentos/agendar" class="<%= activePage === 'agendar' ? 'active' : '' %>">Agendar Atendimento</a>
-      <a href="/atendimentos" class="<%= activePage === 'atendimentos' ? 'active' : '' %>">Atendimentos</a>
-      <a href="/materiais" class="<%= activePage === 'materiais' ? 'active' : '' %>">Materiais</a>
+<!-- NAVBAR PRINCIPAL ECOCLEAN -->
+<nav class="navbar">
+    <div class="nav-content">
+        <!-- Logo e Marca -->
+        <a href="/dashboard" class="brand">
+            <span class="brand-text">EcoCleanSystem</span>
+        </a>
+
+        <!-- Menu de Navegação -->
+        <ul class="nav-links">
+            <li>
+                <a href="/dashboard" class="nav-link <%= activePage === 'dashboard' ? 'active' : '' %>">
+                    <i class="fas fa-calendar-alt"></i>
+                    Agenda
+                </a>
+            </li>
+            <li>
+                <a href="/agendamentos/agendar" class="nav-link <%= activePage === 'agendar' ? 'active' : '' %>">
+                    <i class="fas fa-plus-circle"></i>
+                    Agendar Atendimento
+                </a>
+            </li>
+            <li>
+                <a href="/atendimentos" class="nav-link <%= activePage === 'atendimentos' ? 'active' : '' %>">
+                    <i class="fas fa-clipboard-list"></i>
+                    Atendimentos
+                </a>
+            </li>
+            <li>
+                <a href="/materiais" class="nav-link <%= activePage === 'materiais' ? 'active' : '' %>">
+                    <i class="fas fa-tools"></i>
+                    Materiais
+                </a>
+            </li>
+        </ul>
+
+        <!-- Botão Sair -->
+        <button class="logout-btn" onclick="window.location.href='/logout'">
+            <i class="fas fa-sign-out-alt"></i>
+            Sair
+        </button>
     </div>
-  </div>
-  <div class="topbar-right">
-    <button class="logout-btn" onclick="window.location.href='/logout'">Sair</button>
-  </div>
 </nav>
+
+<!-- Incluir Font Awesome para os ícones -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">

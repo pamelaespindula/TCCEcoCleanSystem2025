@@ -31,17 +31,19 @@ INSERT INTO servicos (nome, descricao, valor, tipo, materiais, duracao) VALUES
 ('Limpeza de placa solar', 'Limpeza e recuperação de eficiência', 99.90, 'Limpeza', 'Produtos de limpeza', '02:00:00'),
 ('Restauração de ACM', 'Recuperação e polimento de ACM danificado', 120.00, 'Restauração', 'Produtos específicos', '03:00:00');
 
--- TABELA DE AGENDAMENTOS (gerenciamento interno de serviços)
+-- TABELA DE AGENDAMENTOS (ATUALIZADA COM TODOS OS NOVOS CAMPOS)
 CREATE TABLE agendamentos (
   id INT AUTO_INCREMENT PRIMARY KEY,
   servico_id INT NOT NULL,
   data_agendada DATE NOT NULL,
   hora_agendada TIME NOT NULL,
   status ENUM('pendente','em execução','concluído') DEFAULT 'pendente',
-  quantidade INT,
-  tamanho VARCHAR(45),
-  observacoes VARCHAR(255),
+  observacoes TEXT,
   imagem VARCHAR(255),
+  -- NOVOS CAMPOS ADICIONADOS
+  nome_cliente VARCHAR(255) NOT NULL,
+  empresa VARCHAR(255),
+  telefone VARCHAR(20),
   FOREIGN KEY (servico_id) REFERENCES servicos(id)
 );
 
@@ -62,3 +64,14 @@ CREATE TABLE servico_materiais (
   FOREIGN KEY (servico_id) REFERENCES servicos(id),
   FOREIGN KEY (material_id) REFERENCES materiais(id)
 );
+
+-- INSERIR ALGUNS MATERIAIS DE EXEMPLO (OPCIONAL)
+INSERT INTO materiais (nome, quantidade, descricao) VALUES
+('Detergente neutro', 50, 'Produto para limpeza geral'),
+('Esponja macia', 100, 'Para limpeza de superfícies delicadas'),
+('Luvas de proteção', 20, 'Proteção para as mãos'),
+('Panos de microfibra', 80, 'Para secagem e polimento');
+
+-- INSERIR UM USUÁRIO ADMIN PADRÃO (ALTERE A SENHA!)
+INSERT INTO usuarios (nome, email, senha, usuario, telefone, tipo) VALUES 
+('pamelaaaa', 'admin@ecoclean.com', '123456', 'admin', '(11) 99999-9999', 'admin');

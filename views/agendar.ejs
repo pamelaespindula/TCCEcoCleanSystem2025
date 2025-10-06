@@ -5,35 +5,66 @@
   <title>Agendar Atendimento - EcoCleanSystem</title>
   <link rel="stylesheet" href="/css/layout.css" />
   <link rel="stylesheet" href="/css/nav.css" />
-  <link rel="stylesheet" href="/css/form.css" />
+  <link rel="stylesheet" href="/css/agendar.css" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 </head>
 <body>
   <%- include('partials/nav', { activePage: 'agendar' }) %>
 
   <main class="main-container">
-    <section class="form-section">
-      <h1>Agendar Novo Atendimento</h1>
+    <section class="agendar-section">
+      <h1 class="agendar-titulo">Agendar Novo Atendimento</h1>
+      
       <form action="/agendamentos/agendar" method="POST" class="form-agendar">
-        <label for="servico">Serviço:</label>
-        <select id="servico" name="servico_id" required>
-          <option value="" selected disabled>Selecione um serviço</option>
-          <option value="1">Limpeza de vidro</option>
-          <option value="2">Limpeza de ACM</option>
-          <option value="3">Limpeza de placa solar</option>
-          <option value="4">Restauração de ACM</option>
-        </select>
+        
+        <!-- Serviço -->
+        <div class="form-group">
+          <label for="servico" class="obrigatorio">Serviço:</label>
+          <select id="servico" name="servico_id" required>
+            <option value="" selected disabled>Selecione um serviço</option>
+            <% servicos.forEach(servico => { %>
+              <option value="<%= servico.id %>"><%= servico.nome %></option>
+            <% }); %>
+          </select>
+        </div>
 
-        <label for="data">Data:</label>
-        <input type="date" id="data" name="data_agendada" required />
+        <!-- Nome do Cliente (OBRIGATÓRIO) -->
+        <div class="form-group">
+          <label for="nome_cliente" class="obrigatorio">Nome do Cliente:</label>
+          <input type="text" id="nome_cliente" name="nome_cliente" required placeholder="Digite o nome completo do cliente">
+        </div>
 
-        <label for="hora">Hora:</label>
-        <input type="time" id="hora" name="hora_agendada" required />
+        <!-- Nome da Empresa (OPCIONAL) -->
+        <div class="form-group">
+          <label for="empresa">Nome da Empresa:</label>
+          <input type="text" id="empresa" name="empresa" placeholder="Opcional - nome da empresa">
+        </div>
 
-        <label for="observacoes">Observações:</label>
-        <textarea id="observacoes" name="observacoes" rows="5" placeholder="Detalhes adicionais"></textarea>
+        <!-- Telefone (OPCIONAL) -->
+        <div class="form-group">
+          <label for="telefone">Telefone:</label>
+          <input type="tel" id="telefone" name="telefone" placeholder="Opcional - (11) 99999-9999">
+        </div>
 
-        <button type="submit" class="btn">Agendar</button>
+        <!-- Data -->
+        <div class="form-group">
+          <label for="data" class="obrigatorio">Data:</label>
+          <input type="date" id="data" name="data_agendada" required>
+        </div>
+
+        <!-- Hora -->
+        <div class="form-group">
+          <label for="hora" class="obrigatorio">Hora:</label>
+          <input type="time" id="hora" name="hora_agendada" required>
+        </div>
+
+        <!-- Observações -->
+        <div class="form-group">
+          <label for="observacoes">Observações:</label>
+          <textarea id="observacoes" name="observacoes" rows="5" placeholder="Detalhes adicionais..."></textarea>
+        </div>
+
+        <button type="submit" class="btn-agendar">Agendar</button>
       </form>
     </section>
   </main>

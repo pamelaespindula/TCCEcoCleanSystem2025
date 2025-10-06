@@ -14,10 +14,14 @@
   <div class="calendar-container">
     <div class="calendar-box">
       <div class="calendar-header">
-        <button id="prevMonthBtn">&lt;</button>
-        <span class="month-display" id="monthDisplay"></span>
-        <span class="year-display" id="yearDisplay"></span>
-        <button id="nextMonthBtn">&gt;</button>
+        <div class="navigation-buttons">
+          <button id="prevMonthBtn">&lt;</button>
+          <button id="nextMonthBtn">&gt;</button>
+        </div>
+        <div class="month-year-container">
+          <span class="month-display" id="monthDisplay"></span>
+          <span class="year-display" id="yearDisplay"></span>
+        </div>
       </div>
       <table id="calendar">
         <thead>
@@ -45,9 +49,14 @@
     const nextMonthBtn = document.getElementById('nextMonthBtn');
     let currentDate = new Date();
 
+    const meses = [
+      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+
     async function getAgendamentos() {
       try {
-        const response = await fetch('/api/agendamentos');
+        const response = await fetch('/agendamentos/api/agendamentos');
         if (!response.ok) throw new Error('Erro ao buscar agendamentos');
         return await response.json();
       } catch (error) {
@@ -58,22 +67,23 @@
 
     function showDayDetails(date, events) {
       const modalHtml = `
-        <div class="modal-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;justify-content:center;align-items:center;z-index:1000;">
-          <div class="modal-content" style="background:#23255a;padding:25px;border-radius:12px;max-width:500px;width:90%;color:white;box-shadow:0 10px 30px rgba(0,0,0,0.3);">
-            <h3 style="margin-top:0;color:#51c7d6;border-bottom:2px solid #51c7d6;padding-bottom:10px;">Agendamentos - ${formatDateBR(date)}</h3>
-            <div class="events-list" style="max-height:300px;overflow-y:auto;margin:15px 0;">
+        <div class="modal-overlay">
+          <div class="modal-content">
+            <h3>Agendamentos - ${formatDateBR(date)}</h3>
+            <div class="events-list">
               ${events.length > 0 
                 ? events.map(event => `
-                  <div style="background:#2f3163;padding:12px;margin:8px 0;border-radius:8px;border-left:4px solid #47e7b6;">
-                    <strong style="color:#47e7b6;">${event.nome_servico || 'Serviço'}</strong> 
-                    <span style="float:right;color:#51c7d6;">${event.hora_agendada || ''}</span>
-                    ${event.observacoes ? `<br><small style="color:#aad1e6;margin-top:5px;display:block;">${event.observacoes}</small>` : ''}
+                  <div class="event-item">
+                    <div class="event-service">${event.title || event.nome_servico || 'Serviço'}</div>
+                    <div class="event-time">${event.hora_agendada || event.time || ''}</div>
+                    <div class="event-client">👤 ${event.nome_cliente || event.cliente || 'Cliente'}</div>
+                    ${event.observacoes ? `<div class="event-observations">📝 ${event.observacoes}</div>` : ''}
                   </div>
                 `).join('')
                 : '<p style="text-align:center;color:#aad1e6;padding:20px;">Não há agendamentos para este dia.</p>'
               }
             </div>
-            <button onclick="this.closest('.modal-overlay').remove()" style="width:100%;padding:12px;background:#51c7d6;color:#191a42;border:none;border-radius:8px;cursor:pointer;font-weight:bold;font-size:1rem;transition:background 0.3s;">Fechar</button>
+            <button class="close-modal" onclick="this.closest('.modal-overlay').remove()">Fechar</button>
           </div>
         </div>
       `;
@@ -85,68 +95,100 @@
       return date.toLocaleDateString('pt-BR');
     }
 
+    function formatTime(timeString) {
+      if (!timeString) return '';
+      return timeString.substring(0, 5);
+    }
+
     async function gerarCalendario(date, eventos) {
       calendarBody.innerHTML = '';
       const year = date.getFullYear();
       const month = date.getMonth();
+      
       yearDisplay.textContent = year;
-      monthDisplay.textContent = date.toLocaleString('pt-BR', { month: 'long' });
+      monthDisplay.textContent = meses[month];
+      
       const firstDay = new Date(year, month, 1).getDay();
       const startDay = firstDay === 0 ? 6 : firstDay - 1;
       const lastDay = new Date(year, month + 1, 0).getDate();
+      
       let day = 1;
+
       for (let semana = 0; semana < 6; semana++) {
         const tr = document.createElement('tr');
         for (let diaSemana = 0; diaSemana < 7; diaSemana++) {
           const td = document.createElement('td');
+          
           if (semana === 0 && diaSemana < startDay) {
             td.classList.add('disabled');
-            td.textContent = '';
           } else if (day > lastDay) {
             td.classList.add('disabled');
-            td.textContent = '';
           } else {
             const dataFormatada = `${year}-${String(month + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
             const hoje = new Date();
+            
+            // Verifica se é hoje
             if (day === hoje.getDate() && month === hoje.getMonth() && year === hoje.getFullYear()) {
               td.classList.add('today');
             }
-            const eventosDoDia = eventos.filter(e => e.data_agendada === dataFormatada);
+
+            // Cria conteúdo do dia
             const dayContent = document.createElement('div');
             dayContent.style.position = 'relative';
-            dayContent.style.minHeight = '60px';
+            dayContent.style.height = '100%';
+            dayContent.style.padding = '4px';
+
+            // Número do dia
             const dayNumber = document.createElement('div');
+            dayNumber.className = 'day-number';
             dayNumber.textContent = day;
-            dayNumber.style.fontWeight = 'bold';
-            dayNumber.style.fontSize = '1.1em';
             dayContent.appendChild(dayNumber);
 
+            // Eventos do dia
+            const eventosDoDia = eventos.filter(e => e.date === dataFormatada || e.data_agendada === dataFormatada);
+            
             if (eventosDoDia.length > 0) {
               td.classList.add('event-day');
+              
+              // Indicador de quantidade de eventos
               const eventIndicator = document.createElement('div');
-              eventIndicator.style.background = '#47e7b6';
-              eventIndicator.style.color = '#13132c';
-              eventIndicator.style.borderRadius = '50%';
-              eventIndicator.style.width = '20px';
-              eventIndicator.style.height = '20px';
-              eventIndicator.style.display = 'inline-flex';
-              eventIndicator.style.alignItems = 'center';
-              eventIndicator.style.justifyContent = 'center';
-              eventIndicator.style.fontSize = '12px';
-              eventIndicator.style.fontWeight = 'bold';
-              eventIndicator.style.position = 'absolute';
-              eventIndicator.style.top = '5px';
-              eventIndicator.style.right = '5px';
+              eventIndicator.className = 'event-indicator';
               eventIndicator.textContent = eventosDoDia.length;
               eventIndicator.title = `${eventosDoDia.length} agendamento(s)`;
               dayContent.appendChild(eventIndicator);
+
+              // Lista de eventos (máximo 3 visíveis)
+              const eventsContainer = document.createElement('div');
+              eventsContainer.style.marginTop = '4px';
+              
+              eventosDoDia.slice(0, 3).forEach(event => {
+                const eventElement = document.createElement('div');
+                eventElement.className = 'calendar-event';
+                eventElement.textContent = `${formatTime(event.hora_agendada || event.time)} - ${event.title || event.nome_servico}`;
+                eventElement.title = `${event.title || event.nome_servico} - ${event.nome_cliente || event.cliente}`;
+                eventsContainer.appendChild(eventElement);
+              });
+
+              if (eventosDoDia.length > 3) {
+                const moreEvents = document.createElement('div');
+                moreEvents.className = 'calendar-event';
+                moreEvents.textContent = `+${eventosDoDia.length - 3} mais`;
+                moreEvents.style.background = '#6c757d';
+                eventsContainer.appendChild(moreEvents);
+              }
+
+              dayContent.appendChild(eventsContainer);
             }
+
             td.appendChild(dayContent);
+            
+            // Evento de clique para mostrar detalhes
             td.addEventListener('click', function() {
               if (!td.classList.contains('disabled')) {
                 showDayDetails(dataFormatada, eventosDoDia);
               }
             });
+            
             day++;
           }
           tr.appendChild(td);
@@ -155,20 +197,25 @@
         if (day > lastDay) break;
       }
     }
+
     async function atualizarCalendario() {
       const eventos = await getAgendamentos();
       gerarCalendario(currentDate, eventos);
     }
+
     prevMonthBtn.addEventListener('click', () => {
       currentDate.setMonth(currentDate.getMonth() - 1);
       atualizarCalendario();
     });
+
     nextMonthBtn.addEventListener('click', () => {
       currentDate.setMonth(currentDate.getMonth() + 1);
       atualizarCalendario();
     });
+
+    // Inicializar calendário
     atualizarCalendario();
   });
-</script>
+  </script>
 </body>
 </html>
