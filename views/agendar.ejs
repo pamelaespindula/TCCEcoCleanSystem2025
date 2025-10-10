@@ -9,59 +9,60 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 </head>
 <body>
-  <%- include('partials/nav', { activePage: 'agendar' }) %>
+  <%- include('partials/nav', { activePage: activePage || 'agendar', usuario: usuario }) %>
 
   <main class="main-container">
     <section class="agendar-section">
       <h1 class="agendar-titulo">Agendar Novo Atendimento</h1>
-      
+
+      <% if (typeof error !== 'undefined' && error) { %>
+        <div class="error-message"><%= error %></div>
+      <% } %>
+
       <form action="/agendamentos/agendar" method="POST" class="form-agendar">
-        
-        <!-- Serviço -->
+
         <div class="form-group">
           <label for="servico" class="obrigatorio">Serviço:</label>
           <select id="servico" name="servico_id" required>
             <option value="" selected disabled>Selecione um serviço</option>
-            <% servicos.forEach(servico => { %>
-              <option value="<%= servico.id %>"><%= servico.nome %></option>
-            <% }); %>
+            <% if (servicos && servicos.length > 0) { %>
+              <% servicos.forEach(servico => { %>
+                <option value="<%= servico.id %>"><%= servico.nome %></option>
+              <% }); %>
+            <% } else { %>
+              <option disabled>Nenhum serviço disponível</option>
+            <% } %>
           </select>
         </div>
 
-        <!-- Nome do Cliente (OBRIGATÓRIO) -->
         <div class="form-group">
           <label for="nome_cliente" class="obrigatorio">Nome do Cliente:</label>
-          <input type="text" id="nome_cliente" name="nome_cliente" required placeholder="Digite o nome completo do cliente">
+          <input type="text" id="nome_cliente" name="nome_cliente" required placeholder="Digite o nome completo do cliente" value="<%= typeof nome_cliente !== 'undefined' ? nome_cliente : '' %>">
         </div>
 
-        <!-- Nome da Empresa (OPCIONAL) -->
         <div class="form-group">
           <label for="empresa">Nome da Empresa:</label>
-          <input type="text" id="empresa" name="empresa" placeholder="Opcional - nome da empresa">
+          <input type="text" id="empresa" name="empresa" placeholder="Opcional - nome da empresa" value="<%= typeof empresa !== 'undefined' ? empresa : '' %>">
         </div>
 
-        <!-- Telefone (OPCIONAL) -->
         <div class="form-group">
           <label for="telefone">Telefone:</label>
-          <input type="tel" id="telefone" name="telefone" placeholder="Opcional - (11) 99999-9999">
+          <input type="tel" id="telefone" name="telefone" placeholder="Opcional - (11) 99999-9999" value="<%= typeof telefone !== 'undefined' ? telefone : '' %>">
         </div>
 
-        <!-- Data -->
         <div class="form-group">
           <label for="data" class="obrigatorio">Data:</label>
-          <input type="date" id="data" name="data_agendada" required>
+          <input type="date" id="data" name="data_agendada" required value="<%= typeof data_agendada !== 'undefined' ? data_agendada : '' %>">
         </div>
 
-        <!-- Hora -->
         <div class="form-group">
           <label for="hora" class="obrigatorio">Hora:</label>
-          <input type="time" id="hora" name="hora_agendada" required>
+          <input type="time" id="hora" name="hora_agendada" required value="<%= typeof hora_agendada !== 'undefined' ? hora_agendada : '' %>">
         </div>
 
-        <!-- Observações -->
         <div class="form-group">
           <label for="observacoes">Observações:</label>
-          <textarea id="observacoes" name="observacoes" rows="5" placeholder="Detalhes adicionais..."></textarea>
+          <textarea id="observacoes" name="observacoes" rows="5" placeholder="Detalhes adicionais..."><%= typeof observacoes !== 'undefined' ? observacoes : '' %></textarea>
         </div>
 
         <button type="submit" class="btn-agendar">Agendar</button>

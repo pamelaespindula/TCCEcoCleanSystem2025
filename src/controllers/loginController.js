@@ -1,15 +1,15 @@
 const bcrypt = require('bcrypt');
-const UserModel = require('../models/userModel'); 
+const UserModel = require('../models/userModel');
 
 exports.loginPage = (req, res) => {
-  res.render('login', { error: null });
+  res.render('login', { error: null, identificador: '' });
 };
 
 exports.login = async (req, res) => {
   const { identificador, senha } = req.body;
 
   const renderLogin = (error = null) => {
-    res.render('login', { error });
+    res.render('login', { error, identificador });
   };
 
   if (!identificador || !senha) {
@@ -37,7 +37,7 @@ exports.login = async (req, res) => {
 
     res.redirect('/');
   } catch (err) {
-    console.error(err);
+    console.error('❌ Erro no login:', err);
     renderLogin('Erro interno. Tente novamente.');
   }
 };

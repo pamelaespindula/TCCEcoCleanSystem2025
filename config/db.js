@@ -1,170 +1,124 @@
+// db.js
 const mysql = require('mysql2/promise');
 const dotenv = require('dotenv');
 dotenv.config();
 
+// Criar pool de conexões
 const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'ecoclean_user',
+  password: process.env.DB_PASSWORD || '', // CORRIGIDO: era DB_PASS
+  database: process.env.DB_NAME || 'ecoclean_db',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
 });
 
-console.log('Pool de conexões do MySQL criado.');
+console.log('Pool de conexões do MySQL criado com sucesso.');
 
-// === FUNÇÃO QUERY PARA COMPATIBILIDADE COM SEU CÓDIGO EXISTENTE ===
+// === Função genérica de query ===
 async function query(sql, params) {
   try {
     const [rows] = await pool.execute(sql, params);
-    return [rows];
+    return rows;
   } catch (error) {
     console.error('Erro na query:', error);
     throw error;
   }
 }
 
-// === FUNÇÕES PARA AGENDAMENTOS (ATENDIMENTOS) ===
-
-// Buscar agendamento por ID
+// === Funções de agendamentos ===
 async function getAtendimentoById(id) {
-  try {
-    const [rows] = await pool.execute(
-      `SELECT a.*, s.nome as nome_servico 
-       FROM agendamentos a 
-       JOIN servicos s ON a.servico_id = s.id 
-       WHERE a.id = ?`,
-      [id]
-    );
-    return rows[0] || null;
-  } catch (error) {
-    console.error('Erro ao buscar agendamento por ID:', error);
-    throw error;
-  }
+  const sql = `
+    SELECT a.*, s.nome AS nome_servico
+    FROM agendamentos a
+    JOIN servicos s ON a.servico_id = s.id
+    WHERE a.id = ?
+  `;
+  const rows = await query(sql, [id]);
+  return rows[0] || null;
 }
 
-// Atualizar agendamento
 async function atualizarAtendimento(id, dados) {
-  try {
-    const [result] = await pool.execute(
-      'UPDATE agendamentos SET data_agendada = ?, hora_agendada = ?, observacoes = ? WHERE id = ?',
-      [dados.data_agendada, dados.hora_agendada, dados.observacoes, id]
-    );
-    return result.affectedRows;
-  } catch (error) {
-    console.error('Erro ao atualizar agendamento:', error);
-    throw error;
-  }
+  const sql = `
+    UPDATE agendamentos
+    SET data_agendada = ?, hora_agendada = ?, observacoes = ?
+    WHERE id = ?
+  `;
+  const result = await query(sql, [
+    dados.data_agendada,
+    dados.hora_agendada,
+    dados.observacoes,
+    id
+  ]);
+  return result.affectedRows;
 }
 
-// Excluir agendamento
 async function excluirAtendimento(id) {
-  try {
-    const [result] = await pool.execute(
-      'DELETE FROM agendamentos WHERE id = ?',
-      [id]
-    );
-    return result.affectedRows;
-  } catch (error) {
-    console.error('Erro ao excluir agendamento:', error);
-    throw error;
-  }
+  const sql = `DELETE FROM agendamentos WHERE id = ?`;
+  const result = await query(sql, [id]);
+  return result.affectedRows;
 }
 
-// Atualizar apenas o status
 async function atualizarStatusAtendimento(id, status) {
-  try {
-    const [result] = await pool.execute(
-      'UPDATE agendamentos SET status = ? WHERE id = ?',
-      [status, id]
-    );
-    return result.affectedRows;
-  } catch (error) {
-    console.error('Erro ao atualizar status do agendamento:', error);
-    throw error;
-  }
+  const sql = `UPDATE agendamentos SET status = ? WHERE id = ?`;
+  const result = await query(sql, [status, id]);
+  return result.affectedRows;
 }
 
-// Buscar todos os agendamentos
 async function getAtendimentos() {
-  try {
-    const [rows] = await pool.execute(
-      `SELECT a.*, s.nome as nome_servico 
-       FROM agendamentos a 
-       JOIN servicos s ON a.servico_id = s.id 
-       ORDER BY a.data_agendada, a.hora_agendada`
-    );
-    return rows;
-  } catch (error) {
-    console.error('Erro ao buscar agendamentos:', error);
-    throw error;
-  }
+  const sql = `
+    SELECT a.*, s.nome AS nome_servico
+    FROM agendamentos a
+    JOIN servicos s ON a.servico_id = s.id
+    ORDER BY a.data_agendada, a.hora_agendada
+  `;
+  return await query(sql);
 }
 
-// Buscar usuário por email
+async function createAgendamento(data) {
+  const sql = `
+    INSERT INTO agendamentos (servico_id, data_agendada, hora_agendada, observacoes, status)
+    VALUES (?, ?, ?, ?, ?)
+  `;
+  const result = await query(sql, [
+    data.servico_id,
+    data.data_agendada,
+    data.hora_agendada,
+    data.observacoes || '',
+    'pendente'
+  ]);
+  return result.insertId;
+}
+
+// === Funções de usuários ===
 async function getUserByEmail(email) {
-  try {
-    const [rows] = await pool.execute(
-      'SELECT * FROM usuarios WHERE email = ?',
-      [email]
-    );
-    return rows[0] || null;
-  } catch (error) {
-    console.error('Erro ao buscar usuário por email:', error);
-    throw error;
-  }
+  const sql = `SELECT * FROM usuarios WHERE email = ?`;
+  const rows = await query(sql, [email]);
+  return rows[0] || null;
 }
 
-// Buscar usuário por usuário (para login)
 async function getUserByUsuario(usuario) {
-  try {
-    const [rows] = await pool.execute(
-      'SELECT * FROM usuarios WHERE usuario = ? LIMIT 1',
-      [usuario]
-    );
-    return rows[0] || null;
-  } catch (error) {
-    console.error('Erro ao buscar usuário por nome de usuário:', error);
-    throw error;
-  }
+  const sql = `SELECT * FROM usuarios WHERE usuario = ? LIMIT 1`;
+  const rows = await query(sql, [usuario]);
+  return rows[0] || null;
 }
 
-// Criar novo usuário
-async function createUser(userData) {
-  try {
-    const [result] = await pool.execute(
-      'INSERT INTO usuarios (nome, email, usuario, senha) VALUES (?, ?, ?, ?)',
-      [userData.nome, userData.email, userData.usuario, userData.senha]
-    );
-    return result.insertId;
-  } catch (error) {
-    console.error('Erro ao criar usuário:', error);
-    throw error;
-  }
+async function createUser(data) {
+  const sql = `
+    INSERT INTO usuarios (nome, email, usuario, senha)
+    VALUES (?, ?, ?, ?)
+  `;
+  const result = await query(sql, [
+    data.nome,
+    data.email,
+    data.usuario,
+    data.senha
+  ]);
+  return result.insertId;
 }
 
-// Criar novo agendamento
-async function createAgendamento(agendamentoData) {
-  try {
-    const [result] = await pool.execute(
-      'INSERT INTO agendamentos (servico_id, data_agendada, hora_agendada, observacoes, status) VALUES (?, ?, ?, ?, ?)',
-      [
-        agendamentoData.servico_id,
-        agendamentoData.data_agendada,
-        agendamentoData.hora_agendada,
-        agendamentoData.observacoes || '',
-        'pendente'
-      ]
-    );
-    return result.insertId;
-  } catch (error) {
-    console.error('Erro ao criar agendamento:', error);
-    throw error;
-  }
-}
-
-// Exportar TODAS as funções
+// === Exportar tudo ===
 module.exports = {
   pool,
   query,
@@ -173,8 +127,8 @@ module.exports = {
   excluirAtendimento,
   atualizarStatusAtendimento,
   getAtendimentos,
+  createAgendamento,
   getUserByEmail,
   getUserByUsuario,
-  createUser,
-  createAgendamento
+  createUser
 };

@@ -3,32 +3,41 @@ const router = express.Router();
 const db = require('../../config/db');
 
 function protegerRota(req, res, next) {
-  if (req.session && req.session.usuario) {
-    return next();
-  }
-  res.status(401).json({ erro: 'Usuário não autenticado' });
+  if (req.session && req.session.usuario) return next();
+  return res.redirect('/login');
+}
+
+function normalizeQueryResult(result) {
+  // aceita mysql2/promise ([rows, fields]) ou mysql2 (rows) ou outros formatos
+  if (Array.isArray(result) && Array.isArray(result[0])) return result[0];
+  return Array.isArray(result) ? result : [];
 }
 
 // GET página formulário agendar
 router.get('/agendar', protegerRota, async (req, res) => {
   try {
-    const [servicos] = await db.query('SELECT id, nome FROM servicos ORDER BY nome ASC');
+    const result = await db.query('SELECT id, nome FROM servicos ORDER BY nome ASC');
+    const rows = normalizeQueryResult(result);
     res.render('agendar', {
-      servicos,
+      servicos: rows,
       usuario: req.session.usuario,
       activePage: 'agendar'
     });
   } catch (error) {
     console.error('Erro ao carregar página de agendar:', error);
-    res.status(500).send('Erro ao carregar página de agendar');
+    res.render('agendar', {
+      servicos: [],
+      usuario: req.session.usuario,
+      activePage: 'agendar',
+      error: 'Erro ao carregar serviços'
+    });
   }
 });
 
-// POST formulário agendamento (ATUALIZADO COM NOVOS CAMPOS)
+// POST formulário agendamento
 router.post('/agendar', protegerRota, async (req, res) => {
   const { servico_id, data_agendada, hora_agendada, observacoes, nome_cliente, empresa, telefone } = req.body;
 
-  // VALIDAÇÃO: Verifica se nome_cliente foi enviado
   if (!nome_cliente || nome_cliente.trim() === '') {
     return res.status(400).send('Nome do cliente é obrigatório');
   }
@@ -38,40 +47,48 @@ router.post('/agendar', protegerRota, async (req, res) => {
       `INSERT INTO agendamentos 
        (servico_id, data_agendada, hora_agendada, observacoes, nome_cliente, empresa, telefone, status) 
        VALUES (?, ?, ?, ?, ?, ?, ?, 'pendente')`,
-      [servico_id, data_agendada, hora_agendada, observacoes || '', nome_cliente, empresa || '', telefone || '']
+      [
+        servico_id || null,
+        data_agendada || null,
+        hora_agendada || null,
+        observacoes || '',
+        nome_cliente,
+        empresa || '',
+        telefone || ''
+      ]
     );
-    res.redirect('/atendimentos');
+    return res.redirect('/atendimentos');
   } catch (err) {
     console.error('Erro ao salvar agendamento:', err);
-    res.status(500).send('Erro ao salvar agendamento');
+    return res.status(500).send('Erro ao salvar agendamento');
   }
 });
 
-// GET todos os atendimentos para a página de checklist
+// GET atendimentos (lista)
 router.get('/', protegerRota, async (req, res) => {
   try {
-    const [atendimentos] = await db.query(`
+    const result = await db.query(`
       SELECT a.*, s.nome as nome_servico 
       FROM agendamentos a 
       JOIN servicos s ON a.servico_id = s.id 
       ORDER BY a.data_agendada DESC, a.hora_agendada DESC
     `);
-    
-    res.render('atendimentos', {
+    const atendimentos = normalizeQueryResult(result);
+    return res.render('atendimentos', {
       atendimentos,
       usuario: req.session.usuario,
       activePage: 'atendimentos'
     });
   } catch (error) {
     console.error('Erro ao buscar atendimentos:', error);
-    res.status(500).send('Erro ao carregar atendimentos');
+    return res.status(500).send('Erro ao carregar atendimentos');
   }
 });
 
-// API GET agendamentos em JSON formatado para calendário (ATUALIZADO COM TODOS OS CAMPOS)
+// API agendamentos para calendário
 router.get('/api/agendamentos', protegerRota, async (req, res) => {
   try {
-    const [agendamentos] = await db.query(`
+    const result = await db.query(`
       SELECT a.id, s.nome as title, a.data_agendada, a.hora_agendada, 
              a.nome_cliente, a.empresa, a.telefone, a.observacoes,
              s.nome as nome_servico
@@ -79,89 +96,87 @@ router.get('/api/agendamentos', protegerRota, async (req, res) => {
       JOIN servicos s ON a.servico_id = s.id
       ORDER BY a.data_agendada, a.hora_agendada
     `);
-
-    const eventos = agendamentos.map(ag => ({
-      id: ag.id,
-      title: ag.title,
-      date: ag.data_agendada.toISOString().split('T')[0],
-      time: ag.hora_agendada ? ag.hora_agendada.slice(0,5) : '',
-      nome_cliente: ag.nome_cliente,
-      empresa: ag.empresa,
-      telefone: ag.telefone,
-      observacoes: ag.observacoes,
-      nome_servico: ag.nome_servico
-    }));
-
-    res.json(eventos);
+    const agendamentos = normalizeQueryResult(result);
+    const eventos = agendamentos.map(ag => {
+      const date = ag.data_agendada instanceof Date
+        ? ag.data_agendada.toISOString().split('T')[0]
+        : (ag.data_agendada || '');
+      const time = ag.hora_agendada ? String(ag.hora_agendada).slice(0,5) : '';
+      return {
+        id: ag.id,
+        title: ag.title,
+        date,
+        time,
+        nome_cliente: ag.nome_cliente,
+        empresa: ag.empresa,
+        telefone: ag.telefone,
+        observacoes: ag.observacoes,
+        nome_servico: ag.nome_servico
+      };
+    });
+    return res.json(eventos);
   } catch (error) {
     console.error('Erro ao buscar agendamentos para API:', error);
-    res.status(500).json({ erro: 'Erro ao buscar agendamentos' });
+    return res.status(500).json({ erro: 'Erro ao buscar agendamentos' });
   }
 });
 
-// ROTA PARA BUSCAR DETALHES DO AGENDAMENTO
+// Detalhes do agendamento
 router.get('/:id', protegerRota, async (req, res) => {
   const { id } = req.params;
-  
   try {
-    const [agendamentos] = await db.query(`
+    const result = await db.query(`
       SELECT a.*, s.nome as nome_servico 
       FROM agendamentos a 
       JOIN servicos s ON a.servico_id = s.id 
       WHERE a.id = ?
     `, [id]);
-    
-    if (agendamentos.length === 0) {
-      return res.status(404).json({ message: 'Agendamento não encontrado' });
-    }
-    
-    res.json(agendamentos[0]);
+    const rows = normalizeQueryResult(result);
+    if (!rows || rows.length === 0) return res.status(404).json({ message: 'Agendamento não encontrado' });
+    return res.json(rows[0]);
   } catch (error) {
     console.error('Erro ao buscar agendamento:', error);
-    res.status(500).json({ message: 'Erro ao buscar agendamento' });
+    return res.status(500).json({ message: 'Erro ao buscar agendamento' });
   }
 });
 
-// ROTA PARA ATUALIZAR STATUS (CONCLUÍDO/PENDENTE)
+// Atualizar status
 router.put('/:id', protegerRota, async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
-  
   try {
     await db.query('UPDATE agendamentos SET status = ? WHERE id = ?', [status, id]);
-    res.json({ success: true });
+    return res.json({ success: true });
   } catch (error) {
     console.error('Erro ao atualizar status:', error);
-    res.status(500).json({ success: false, message: 'Erro ao atualizar status' });
+    return res.status(500).json({ success: false, message: 'Erro ao atualizar status' });
   }
 });
 
-// ROTA PARA ALTERAR AGENDAMENTO
+// Alterar agendamento
 router.put('/alterar', protegerRota, async (req, res) => {
   const { id, data_agendada, hora_agendada, observacoes } = req.body;
-  
   try {
     await db.query(
       'UPDATE agendamentos SET data_agendada = ?, hora_agendada = ?, observacoes = ? WHERE id = ?',
-      [data_agendada, hora_agendada, observacoes, id]
+      [data_agendada || null, hora_agendada || null, observacoes || '', id]
     );
-    res.json({ success: true });
+    return res.json({ success: true });
   } catch (error) {
     console.error('Erro ao atualizar agendamento:', error);
-    res.status(500).json({ success: false, message: 'Erro ao atualizar agendamento' });
+    return res.status(500).json({ success: false, message: 'Erro ao atualizar agendamento' });
   }
 });
 
-// ROTA PARA EXCLUIR AGENDAMENTO
+// Excluir agendamento
 router.delete('/:id', protegerRota, async (req, res) => {
   const { id } = req.params;
-  
   try {
     await db.query('DELETE FROM agendamentos WHERE id = ?', [id]);
-    res.json({ success: true });
+    return res.json({ success: true });
   } catch (error) {
     console.error('Erro ao excluir agendamento:', error);
-    res.status(500).json({ success: false, message: 'Erro ao excluir agendamento' });
+    return res.status(500).json({ success: false, message: 'Erro ao excluir agendamento' });
   }
 });
 

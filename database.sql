@@ -1,8 +1,7 @@
-DROP DATABASE IF EXISTS ecoclean;
-CREATE DATABASE ecoclean;
-USE ecoclean;
+CREATE DATABASE ecoclean_db;
 
--- TABELA DE USUÁRIOS (apenas administradores/dono)
+USE ecoclean_db;
+
 CREATE TABLE usuarios (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nome VARCHAR(100) NOT NULL,
@@ -10,30 +9,13 @@ CREATE TABLE usuarios (
   senha VARCHAR(255) NOT NULL,
   usuario VARCHAR(100) NOT NULL UNIQUE,
   telefone VARCHAR(20),
-  tipo ENUM('admin') DEFAULT 'admin'
+  tipo ENUM('admin') DEFAULT 'admin',
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
--- TABELA DE SERVIÇOS (cadastro do que a equipe realiza)
 CREATE TABLE servicos (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  nome VARCHAR(100) NOT NULL,
-  descricao TEXT,
-  valor DECIMAL(10,2) NOT NULL,
-  tipo VARCHAR(80),
-  materiais VARCHAR(80),
-  duracao TIME
+  nome VARCHAR(100) NOT NULL
 );
-
--- Popular tabela servicos com valores iniciais
-INSERT INTO servicos (nome, descricao, valor, tipo, materiais, duracao) VALUES
-('Limpeza de vidro', 'Limpeza completa de vidros em geral', 59.90, 'Limpeza', 'Produtos de limpeza', '01:00:00'),
-('Limpeza pós obra comercial', 'Limpeza intensiva após obra em ambientes comerciais', 149.90, 'Limpeza', 'Produtos especiais', '03:00:00'),
-('Limpeza pós obra residencial', 'Limpeza detalhada após obra em residências', 129.90, 'Limpeza', 'Produtos especiais', '02:30:00'),
-('Lavagem de fachada', 'Lavagem e manutenção completa de fachadas', 189.90, 'Limpeza', 'Produtos de limpeza', '04:00:00'),
-('Lavagem de ACM', 'Lavagem e manutenção de ACM na fachada', 79.90, 'Limpeza', 'Produtos de limpeza', '01:30:00'),
-('Lavagem de placas solares', 'Lavagem e recuperação de eficiência de placas solares', 99.90, 'Limpeza', 'Produtos de limpeza', '02:00:00');
-
--- TABELA DE AGENDAMENTOS (ATUALIZADA COM TODOS OS NOVOS CAMPOS)
 CREATE TABLE agendamentos (
   id INT AUTO_INCREMENT PRIMARY KEY,
   servico_id INT NOT NULL,
@@ -41,39 +23,17 @@ CREATE TABLE agendamentos (
   hora_agendada TIME NOT NULL,
   status ENUM('pendente','em execução','concluído') DEFAULT 'pendente',
   observacoes TEXT,
-  imagem VARCHAR(255),
-  -- NOVOS CAMPOS ADICIONADOS
   nome_cliente VARCHAR(255) NOT NULL,
   empresa VARCHAR(255),
   telefone VARCHAR(20),
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (servico_id) REFERENCES servicos(id)
 );
-
--- TABELA DE MATERIAIS (controle dos itens usados)
 CREATE TABLE materiais (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nome VARCHAR(100) NOT NULL,
   quantidade INT NOT NULL,
-  descricao VARCHAR(255)
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
--- TABELA DE USO DE MATERIAIS NOS SERVIÇOS
-CREATE TABLE servico_materiais (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  servico_id INT NOT NULL,
-  material_id INT NOT NULL,
-  quantidade_usada INT NOT NULL,
-  FOREIGN KEY (servico_id) REFERENCES servicos(id),
-  FOREIGN KEY (material_id) REFERENCES materiais(id)
-);
-
--- INSERIR ALGUNS MATERIAIS DE EXEMPLO (OPCIONAL)
-INSERT INTO materiais (nome, quantidade, descricao) VALUES
-('Detergente neutro', 50, 'Produto para limpeza geral'),
-('Esponja macia', 100, 'Para limpeza de superfícies delicadas'),
-('Luvas de proteção', 20, 'Proteção para as mãos'),
-('Panos de microfibra', 80, 'Para secagem e polimento');
-
--- INSERIR UM USUÁRIO ADMIN PADRÃO (ALTERE A SENHA!)
-INSERT INTO usuarios (nome, email, senha, usuario, telefone, tipo) VALUES 
-('pamelaaaa', 'admin@ecoclean.com', '123456', 'admin', '(11) 99999-9999', 'admin');
+INSERT INTO usuarios (nome, email, senha, usuario, tipo) VALUES 
+('admecoclean', 'admin@ecoclean.com', '123456', 'admecoclean', 'admin');
