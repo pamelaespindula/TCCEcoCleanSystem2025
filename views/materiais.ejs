@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <title>Gestão de Materiais - EcoCleanSystem</title>
+  <title>Gestão de Materiais - Sistema de Gestão</title>
   <link rel="stylesheet" href="/css/layout.css" />
   <link rel="stylesheet" href="/css/nav.css" />
   <link rel="stylesheet" href="/css/materiais.css" />
@@ -11,59 +11,31 @@
 <body>
   <%- include('partials/nav', { activePage: activePage || 'materiais', usuario: usuario }) %>
 
-  <main class="main-container container">
-    <section class="materiais-section">
-      <h1>Materiais</h1>
+  <div class="container">
+    <header class="page-header">
+      <h1>Gerenciamento de Materiais</h1>
+      <div class="page-subtitle">Controle e gestão de materiais em estoque</div>
+    </header>
 
-      <% if (typeof error !== 'undefined' && error) { %>
-        <div class="error-message"><%= error %></div>
-      <% } %>
+    <section class="section">
+      <h2><i class="fa fa-plus-circle"></i> Cadastrar Novo Material</h2>
+      <form action="/materiais" method="POST" class="form-cadastro">
+        <div class="form-group">
+          <label for="nome">Nome do Material</label>
+          <input id="nome" name="nome" type="text" required placeholder="Digite o nome do material" value="<%= typeof nome !== 'undefined' ? nome : '' %>">
+        </div>
+        <div class="form-group">
+          <label for="quantidade">Quantidade</label>
+          <input id="quantidade" name="quantidade" type="number" min="0" step="1" required value="<%= typeof quantidade !== 'undefined' ? quantidade : '0' %>">
+        </div>
+        <button type="submit" class="btn-adicionar"><i class="fa fa-plus"></i> Adicionar Material</button>
+      </form>
+    </section>
 
-      <% if (typeof sucesso !== 'undefined' && sucesso) { %>
-        <div class="success-message"><%= sucesso %></div>
-      <% } %>
-
-      <!-- FORMULÁRIO: cria ou edita conforme editMaterial (checagem segura) -->
-      <section class="criar-material">
-        <% if (typeof editMaterial !== 'undefined' && editMaterial) { %>
-          <form action="/materiais/atualizar/<%= editMaterial.id %>" method="POST" class="form-criar-material">
-            <div class="input-group">
-              <label for="nome">Editar Nome</label>
-              <input id="nome" name="nome" type="text" required placeholder="Nome do material" value="<%= editMaterial.nome %>">
-            </div>
-
-            <div class="input-group">
-              <label for="quantidade">Quantidade</label>
-              <input id="quantidade" name="quantidade" type="number" min="0" step="1" placeholder="0" value="<%= typeof editMaterial.quantidade !== 'undefined' ? editMaterial.quantidade : '' %>">
-            </div>
-
-            <div class="form-actions">
-              <button type="submit" class="btn-salvar">Atualizar</button>
-              <a href="/materiais" class="btn-cancel">Cancelar</a>
-            </div>
-          </form>
-        <% } else { %>
-          <form action="/materiais/criar" method="POST" class="form-criar-material">
-            <div class="input-group">
-              <label for="nome">Nome</label>
-              <input id="nome" name="nome" type="text" required placeholder="Nome do material" value="<%= typeof nome !== 'undefined' ? nome : '' %>">
-            </div>
-
-            <div class="input-group">
-              <label for="quantidade">Quantidade</label>
-              <input id="quantidade" name="quantidade" type="number" min="0" step="1" placeholder="0" value="<%= typeof quantidade !== 'undefined' ? quantidade : '' %>">
-            </div>
-
-            <div class="form-actions">
-              <button type="submit" class="btn-salvar">Adicionar</button>
-            </div>
-          </form>
-        <% } %>
-      </section>
-
-      <!-- TABELA DE MATERIAIS -->
-      <% if (Array.isArray(materiais) && materiais.length > 0) { %>
-        <div class="tabela-container">
+    <section class="section">
+      <h2><i class="fa fa-clipboard-list"></i> Lista de Materiais</h2>
+      <div class="tabela-container">
+        <% if (Array.isArray(materiais) && materiais.length > 0) { %>
           <table class="tabela-materiais">
             <thead>
               <tr>
@@ -73,25 +45,34 @@
               </tr>
             </thead>
             <tbody>
-              <% materiais.forEach(function(mat) { %>
-                <tr>
-                  <td><%= mat.nome %></td>
-                  <td><%= typeof mat.quantidade !== 'undefined' ? mat.quantidade : '' %></td>
-                  <td class="acoes-cell">
-                    <a class="btn-editar btn-acao" href="/materiais/editar/<%= mat.id %>">Editar</a>
-                    <form method="POST" action="/materiais/excluir/<%= mat.id %>" style="display:inline;">
-                      <button type="submit" class="btn-excluir btn-acao" onclick="return confirm('Confirma exclusão deste material?')">Excluir</button>
-                    </form>
+              <% materiais.forEach(material => { %>
+              <tr>
+                <form action="/materiais/editar/<%= material.id %>" method="POST">
+                  <td>
+                    <input type="text" name="nome" value="<%= material.nome %>" required />
                   </td>
-                </tr>
-              <% }); %>
+                  <td>
+                    <input type="number" name="quantidade" value="<%= material.quantidade %>" required min="0" />
+                  </td>
+                  <td class="acoes-cell">
+                    <button type="submit" class="btn-acao btn-editar"><i class="fa fa-save"></i> Salvar</button>
+                    <button formaction="/materiais/deletar/<%= material.id %>" formmethod="POST" class="btn-acao btn-deletar" onclick="return confirm('Confirma exclusão?')"><i class="fa fa-trash"></i> Excluir</button>
+                  </td>
+                </form>
+              </tr>
+              <% }) %>
             </tbody>
           </table>
-        </div>
-      <% } else { %>
-        <div class="empty-message">Nenhum material cadastrado.</div>
-      <% } %>
+        <% } else { %>
+          <div class="empty-state">
+            <div class="empty-icon"><i class="fa fa-box-open"></i></div>
+            <div class="empty-text">Nenhum material cadastrado.</div>
+            <div class="empty-subtext">Adicione novos materiais para visualizar aqui.</div>
+          </div>
+        <% } %>
+      </div>
     </section>
-  </main>
+  </div>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </body>
 </html>
