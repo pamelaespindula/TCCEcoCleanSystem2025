@@ -18,14 +18,14 @@
 
         <form method="POST" action="/login">
           <div class="input-group">
-            <label for="identificador">Email ou Usuário</label>
+            <label for="identificador">Usuário</label>
             <input 
               type="text" 
               id="identificador" 
               name="identificador" 
               required 
               value="<%= typeof identificador !== 'undefined' ? identificador : '' %>"
-              placeholder="Digite seu email ou nome de usuário"
+              placeholder="Digite seu usuário"
             >
           </div>
 
